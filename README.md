@@ -6,7 +6,7 @@
 ## demo
 [DEMO](https://zxctb.top:8081)
 
-##### account information
+**account information**
 administrator account
 username：admin
 password：123456
