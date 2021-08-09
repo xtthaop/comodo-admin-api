@@ -3,6 +3,18 @@
 ## front end
 [comodo-admin-web](https://github.com/xtthaop/comodo-admin-web.git)
 
+## demo
+[DEMO](https://zxctb.top:8081)
+
+##### account information
+administrator account
+username：admin
+password：123456
+
+ordinary users account
+username：user
+password：123456
+
 ![截图](https://github.com/xtthaop/image-lib/blob/master/image/screenshot.png?raw=true)
 
 ### software environment
@@ -37,11 +49,9 @@ listen 56890
 </VirtualHost>
 ```
 
-### account information
-管理员账号
-用户名：admin
-密码：123456
+### question
+**1.imagepng() permission denied**
+```
+chmod -R 777 public
+```
 
-普通用户账号
-用户名：user
-密码：123456
