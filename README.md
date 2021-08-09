@@ -6,14 +6,14 @@
 ## demo
 [DEMO](https://zxctb.top:8081)
 
-#### account information
-administrator account
-username：admin
-password：123456
+#### account information   
+administrator account   
+username：admin    
+password：123456   
 
-ordinary users account
-username：user
-password：123456
+ordinary users account   
+username：user   
+password：123456   
 
 ![截图](https://github.com/xtthaop/image-lib/blob/master/image/screenshot.png?raw=true)
 
