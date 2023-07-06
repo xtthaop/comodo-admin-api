@@ -75,6 +75,10 @@ Class Captcha {
       }
     }
 
+    if(!is_dir('./public/captcha')){
+      mkdir('./public/captcha', 0777);
+    }
+
     imagepng($dst_im, './public/captcha/dst.png');
     imagepng($jigsaw_im, './public/captcha/jigsaw.png');
     imagedestroy($src_im);
