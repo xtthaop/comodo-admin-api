@@ -4,11 +4,15 @@ Class Captcha {
   
   private function _makeJigsaw(){
     $jigsawArray = array();
+    // 拼图宽高
     $pic_w = 50;
     $pic_h = 50;
+    // 拼图圆半径
     $r = 10;
+    // 坐标落在圆内的最大值 x^2 + y^2 <= r^2
     $dr = $r * $r;
 
+    // 找到圆心位置坐标
     $circular1_x = ($pic_w - $r)/2;
     $circular1_y = $r;
 
