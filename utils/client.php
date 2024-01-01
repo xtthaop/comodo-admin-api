@@ -12,16 +12,6 @@ Class Client {
     return $ipaddr;
   }
 
-  public function getIpLocation($ip = ''){
-    $ipJson = @file_get_contents("http://opendata.baidu.com/api.php?query=" . $ip . "&co=&resource_id=6006&oe=utf8");
-    $ipArr = json_decode(stripslashes($ipJson), 1);
-    if($ipArr['status'] == 0 && !empty($ipArr['data'])){
-      return $ipArr['data'][0]['location'];
-    }else{
-      return '';
-    }
-  }
-
   public function getBrowser(){
     $sys = $_SERVER['HTTP_USER_AGENT'];
     if(stripos($sys, "Firefox/") > 0){

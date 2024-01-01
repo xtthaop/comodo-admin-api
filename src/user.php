@@ -129,10 +129,9 @@
 
     private function _handleRecordLoginLog($username){
       $ipaddr = $this -> _client -> getIpAddress();
-      $location = $this -> _client -> getIpLocation($ipaddr);
       $browser = $this -> _client -> getBrowser();
       $os = $this -> _client -> getOs();
-      $this -> _sysLogLib -> recordLoginLog($username, $ipaddr, $location, $browser, $os);
+      $id = $this -> _sysLogLib -> recordLoginLog($username, $ipaddr, $browser, $os);
     }
 
     private function _handleGetUserInfo(){

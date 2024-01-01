@@ -6,15 +6,14 @@
       $this -> _db = $db;
     }
 
-    public function recordLoginLog($username, $ipaddr, $location, $browser, $os){
+    public function recordLoginLog($username, $ipaddr, $browser, $os){
       $currentTime = date('Y-m-d H:i:s');
 
-      $sql = 'INSERT INTO `sys_login_log` (`username`, `ipaddr`, `location`, `browser`, `os`, `login_time`)
-             VALUES (:username, :ipaddr, :location, :browser, :os, :login_time)';
+      $sql = 'INSERT INTO `sys_login_log` (`username`, `ipaddr`, `browser`, `os`, `login_time`)
+             VALUES (:username, :ipaddr, :browser, :os, :login_time)';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':username', $username);
       $stml -> bindParam(':ipaddr', $ipaddr);
-      $stml -> bindParam(':location', $location);
       $stml -> bindParam(':browser', $browser);
       $stml -> bindParam(':os', $os);
       $stml -> bindParam(':login_time', $currentTime);
