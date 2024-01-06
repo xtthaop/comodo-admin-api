@@ -82,7 +82,7 @@
       $tree = array();
       if(!empty($res)){
         foreach($res as &$value){
-          if($value['menu_type'] !== 'F'){
+          if($value['menu_type'] !== 'B'){
             $value['children'] = $this -> _generateAllRoutes($value['menu_id']);
             $tree[] = $value;
           }
@@ -97,7 +97,7 @@
       $tree = array();
       if(!empty($res)){
         foreach($res as &$value){
-          if($value['menu_type'] !== 'F'){
+          if($value['menu_type'] !== 'B'){
             $value['children'] = $this -> _generateAPermissionRoutes($value['menu_id']);
             $tree[] = $value;
           }

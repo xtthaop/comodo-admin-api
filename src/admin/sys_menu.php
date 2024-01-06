@@ -81,8 +81,9 @@
       $body = json_decode($raw, true);
 
       $this -> _checkForRequired($body);
+      $data = $this -> _convertBodyContent($body);
 
-      $menuId = $this -> _sysMenuLib -> addMenu($body);
+      $menuId = $this -> _sysMenuLib -> addMenu($data);
       $this -> _handleSetMenuApi($menuId, $body['apis']);
       return [
         'code' => 0,
@@ -104,38 +105,72 @@
     private function _checkForRequired($body){
       if(
         !(isset($body['title']) && strlen($body['title'])) ||
-        !(isset($body['sort']) && strlen($body['sort'])) ||
         !(isset($body['menu_type']) && strlen($body['menu_type']))
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
-      if(empty($body['parent_id'])){
-        $body['parent_id'] = 0;
+      if(
+        $body['menu_type'] === 'P' &&
+        (!(isset($body['component']) && strlen($body['component'])) ||
+        !(isset($body['path']) && strlen($body['path'])))
+      ){
+        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
-      if(!(isset($body['path']) && strlen($body['path']))){
-        $body['path'] = '';
+      $menuId = $body['menu_id'];
+
+      if((isset($body['route_name']) && strlen($body['route_name']))){
+        $existedRouteNameCount = $this -> _sysMenuLib -> getExistedCount('route_name', $body['route_name'], $menuId);
+        if($existedRouteNameCount > 0){
+          throw new Exception('路由名称已被使用', ErrorCode::ROUTE_NAME_EXISTED);
+        }
       }
 
-      $menuId = empty($body['menu_id']) ? '' : $body['menu_id'];
-
-      $routeName = !(isset($body['route_name']) && strlen($body['route_name'])) ? null : $body['route_name'];
-      $existedRouteNameCount = $this -> _sysMenuLib -> getExistedCount('route_name', $routeName, $menuId);
-      if($existedRouteNameCount > 0){
-        throw new Exception('路由名称已被使用', ErrorCode::ROUTE_NAME_EXISTED);
+      if((isset($body['path']) && strlen($body['path']))){
+        $existedRoutePathCount = $this -> _sysMenuLib -> getExistedCount('path', $body['path'], $menuId);
+        if($existedRoutePathCount > 0){
+          throw new Exception('路由地址已被使用', ErrorCode::ROUTE_PATH_EXISTED);
+        }
       }
 
-      $routePath = !(isset($body['path']) && strlen($body['path'])) ? null : $body['path'];
-      $existedRoutePathCount = $this -> _sysMenuLib -> getExistedCount('path', $routePath, $menuId);
-      if($existedRoutePathCount > 0){
-        throw new Exception('路由地址已被使用', ErrorCode::ROUTE_PATH_EXISTED);
+      if((isset($body['permission']) && strlen($body['permission']))){
+        $existedPermissionCount = $this -> _sysMenuLib -> getExistedCount('permission', $body['permission'], $menuId);
+        if($existedPermissionCount > 0){
+          throw new Exception('权限标识已被使用', ErrorCode::PERMISSION_EXISTED);
+        }
       }
+    }
 
-      $permission = !(isset($body['permission']) && strlen($body['permission'])) ? null : $body['permission'];
-      $existedPermissionCount = $this -> _sysMenuLib -> getExistedCount('permission', $permission, $menuId);
-      if($existedPermissionCount > 0){
-        throw new Exception('权限标识已被使用', ErrorCode::PERMISSION_EXISTED);
+    private function _convertBodyContent($body){
+      ['parent_id' => $parentId, 'menu_id' => $menuId, 'title' => $title, 'sort' => $sort, 'menu_type' => $menuType] = $body;
+      $baseObj = ['parent_id' => $parentId, 'menu_id' => $menuId, 'title' => $title, 'sort' => $sort, 'menu_type' => $menuType];
+      switch($menuType){
+        case 'F': {
+          ['icon' => $icon, 'visible' => $visible] = $body;
+          return array_merge($baseObj, ['icon' => $icon, 'visible' => $visible]);
+        }
+        case 'P': {
+          ['icon' => $icon, 'visible' => $visible, 'is_link' => $isLink] = $body;
+          if($isLink){
+            ['path' => $path, 'permission' => $permission] = $body;
+            return array_merge($baseObj, ['icon' => $icon, 'visible' => $visible, 'is_link' => $isLink, 'path' => $path, 'permission' => $permission]);
+          }else{
+            $parent = $this -> _sysMenuLib -> getMenuInfo($parentId);
+            if($parent['menu_type'] !== 'P'){
+              $body['active_menu'] = null;
+            }
+            if($parent['menu_type'] === 'P' && $body['menu_type'] === 'P'){
+              $body['visible'] = 0;
+              $body['is_link'] = 0;
+            }
+            return $body;
+          }
+        }
+        case 'B': {
+          ['permission' => $permission, 'apis' => $apis] = $body;
+          return array_merge($baseObj, ['visible' => 2, 'permission' => $permission, 'apis' => $apis]);
+        }
       }
     }
 

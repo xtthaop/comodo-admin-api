@@ -16,7 +16,7 @@
       }
 
       if(isset($params['visible']) && strlen($params['visible'])){
-        $sql .= ' AND `visible`=:visible AND `menu_type`!="F"';
+        $sql .= ' AND `visible`=:visible';
         $arr[':visible'] = $params['visible'];
       }
 
@@ -51,9 +51,9 @@
       $currentTime = date('Y-m-d H:i:s');
 
       $sql = 'INSERT INTO `sys_menu` (`title`, `route_name`, `component`, `sort`, `path`, 
-             `parent_id`, `icon`, `menu_type`, `is_frame`, `visible`, `permission`, `layout`, `cache`, `create_by`, `created_at`) 
-             VALUES (:title, :route_name, :component, :sort, :path, :parent_id, :icon, :menu_type, :is_frame, 
-             :visible, :permission, :layout, :cache, :create_by, :created_at)';
+             `parent_id`, `icon`, `menu_type`, `is_link`, `visible`, `permission`, `layout`, `cache`, `active_menu`, `create_by`, `created_at`) 
+             VALUES (:title, :route_name, :component, :sort, :path, :parent_id, :icon, :menu_type, :is_link, 
+             :visible, :permission, :layout, :cache, :active_menu, :create_by, :created_at)';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':title', $body['title']);
       $stml -> bindParam(':route_name', $body['route_name']);
@@ -63,11 +63,12 @@
       $stml -> bindParam(':path', $body['path']);
       $stml -> bindParam(':parent_id', $body['parent_id']);
       $stml -> bindParam(':icon', $body['icon']);
-      $stml -> bindParam(':is_frame', $body['is_frame']);
+      $stml -> bindParam(':is_link', $body['is_link']);
       $stml -> bindParam(':visible', $body['visible']);
       $stml -> bindParam(':permission', $body['permission']);
       $stml -> bindParam(':layout', $body['layout']);
       $stml -> bindParam(':cache', $body['cache']);
+      $stml -> bindParam(':active_menu', $body['active_menu']);
       $stml -> bindParam(':create_by', $gUserId);
       $stml -> bindParam(':created_at', $currentTime);
       $stml -> execute();
@@ -91,7 +92,7 @@
     }
 
     public function getExistedCount($column, $value, $id){
-      $sql = 'SELECT COUNT(*) FROM `sys_menu` WHERE ' . $column . '=:' . $column . ' AND `menu_id`!=:menu_id';
+      $sql = 'SELECT COUNT(*) FROM `sys_menu` WHERE ' . $column . '=:' . $column . ' AND (`menu_id`!=:menu_id OR `menu_id` is not NULL)';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':' . $column, $value);
       $stml -> bindParam(':menu_id', $id);
