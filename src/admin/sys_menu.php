@@ -84,7 +84,7 @@
       $data = $this -> _convertBodyContent($body);
 
       $menuId = $this -> _sysMenuLib -> addMenu($data);
-      $this -> _handleSetMenuApi($menuId, $body['apis']);
+      $this -> _handleSetMenuApi($menuId, $data['apis']);
       return [
         'code' => 0,
         'message' => 'success',
@@ -118,8 +118,17 @@
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
-      $menuId = $body['menu_id'];
+      $parent = $this -> _sysMenuLib -> getMenuInfo($body['parent_id']);
+      $parentMenuType = $parent['menu_type'];
+      $menuType = $body['menu_type'];
+      if(
+        ($parentMenuType === 'P' && $menuType === 'F') ||
+        ($parentMenuType === 'B')
+      ){
+        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      }
 
+      $menuId = $body['menu_id'];
       if((isset($body['route_name']) && strlen($body['route_name']))){
         $existedRouteNameCount = $this -> _sysMenuLib -> getExistedCount('route_name', $body['route_name'], $menuId);
         if($existedRouteNameCount > 0){
@@ -183,28 +192,33 @@
       }
 
       $this -> _checkForRequired($body);
+      $data = $this -> _convertBodyContent($body);
 
-      $menuInfo = $this -> _sysMenuLib -> getMenuInfo($body['menu_id']);
+      $menuInfo = $this -> _sysMenuLib -> getMenuInfo($data['menu_id']);
+      $parent = $this -> _sysMenuLib -> getMenuInfo($data['parent_id']);
       if($menuInfo['permission'] === 'admin:sysmenu'){
         if(
-          $body['permission'] != $menuInfo['permission'] ||
-          $body['path'] !== $menuInfo['path'] ||
-          $body['component'] != $menuInfo['component'] ||
-          $body['route_name'] != $menuInfo['route_name'] ||
-          $body['visible'] != $menuInfo['visible'] ||
-          $body['is_frame'] != $menuInfo['is_frame'] ||
-          $body['menu_type'] != $menuInfo['menu_type']
+          $parent['menu_type'] === 'P' ||
+          $data['permission'] != $menuInfo['permission'] ||
+          $data['path'] !== $menuInfo['path'] ||
+          $data['component'] != $menuInfo['component'] ||
+          $data['route_name'] != $menuInfo['route_name'] ||
+          $data['visible'] != $menuInfo['visible'] ||
+          $data['is_link'] != $menuInfo['is_link'] ||
+          $data['menu_type'] != $menuInfo['menu_type'] ||
+          $data['layout'] != $menuInfo['layout'] ||
+          $data['cache'] != $menuInfo['cache']
         ){
           throw new Exception('修改失败（包含不允许被修改的菜单）', ErrorCode::MENU_CANT_UPDATE);
         }
       }
 
-      if($body['parent_id'] == $menuInfo['menu_id']){
+      if($data['parent_id'] == $menuInfo['menu_id']){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
-      $this -> _sysMenuLib -> updateMenu($body);
-      $this -> _handleSetMenuApi($body['menu_id'], $body['apis']);
+      $this -> _sysMenuLib -> updateMenu($data);
+      $this -> _handleSetMenuApi($data['menu_id'], $data['apis']);
       return [
         'code' => 0,
         'message' => 'success',

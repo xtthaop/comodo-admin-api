@@ -92,7 +92,8 @@
     }
 
     public function getExistedCount($column, $value, $id){
-      $sql = 'SELECT COUNT(*) FROM `sys_menu` WHERE ' . $column . '=:' . $column . ' AND (`menu_id`!=:menu_id OR `menu_id` is not NULL)';
+      $id = $id ? $id : 0;
+      $sql = 'SELECT COUNT(*) FROM `sys_menu` WHERE ' . $column . '=:' . $column . ' AND `menu_id`!=:menu_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':' . $column, $value);
       $stml -> bindParam(':menu_id', $id);
@@ -107,8 +108,8 @@
 
       $sql = 'UPDATE `sys_menu` SET `title`=:title, `route_name`=:route_name, `component`=:component, 
              `sort`=:sort, `path`=:path, `parent_id`=:parent_id, `icon`=:icon, `menu_type`=:menu_type, 
-             `is_frame`=:is_frame, `visible`=:visible, `permission`=:permission, `layout`=:layout, `cache`=:cache, `update_by`=:update_by, 
-             `updated_at`=:updated_at WHERE `menu_id`=:menu_id';
+             `is_link`=:is_link, `visible`=:visible, `permission`=:permission, `layout`=:layout, `cache`=:cache, `active_menu`=:active_menu, 
+             `update_by`=:update_by, `updated_at`=:updated_at WHERE `menu_id`=:menu_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':menu_id', $body['menu_id']);
       $stml -> bindParam(':title', $body['title']);
@@ -119,11 +120,12 @@
       $stml -> bindParam(':path', $body['path']);
       $stml -> bindParam(':parent_id', $body['parent_id']);
       $stml -> bindParam(':icon', $body['icon']);
-      $stml -> bindParam(':is_frame', $body['is_frame']);
+      $stml -> bindParam(':is_link', $body['is_link']);
       $stml -> bindParam(':visible', $body['visible']);
       $stml -> bindParam(':permission', $body['permission']);
       $stml -> bindParam(':layout', $body['layout']);
       $stml -> bindParam(':cache', $body['cache']);
+      $stml -> bindParam(':active_menu', $body['active_menu']);
       $stml -> bindParam(':update_by', $gUserId);
       $stml -> bindParam(':updated_at', $currentTime);
       $stml -> execute();
