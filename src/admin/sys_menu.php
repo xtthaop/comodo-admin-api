@@ -111,7 +111,7 @@
       }
 
       if(
-        $body['menu_type'] === 'P' &&
+        ($body['menu_type'] === 'P' && !$body['is_link']) &&
         (!(isset($body['component']) && strlen($body['component'])) ||
         !(isset($body['path']) && strlen($body['path'])))
       ){
