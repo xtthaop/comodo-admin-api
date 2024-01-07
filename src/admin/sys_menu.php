@@ -153,6 +153,8 @@
 
     private function _convertBodyContent($body){
       ['parent_id' => $parentId, 'menu_id' => $menuId, 'title' => $title, 'sort' => $sort, 'menu_type' => $menuType] = $body;
+      $sort = $sort ? $sort : 0;
+      $parentId = $parentId ? $parentId : 0;
       $baseObj = ['parent_id' => $parentId, 'menu_id' => $menuId, 'title' => $title, 'sort' => $sort, 'menu_type' => $menuType];
       switch($menuType){
         case 'F': {
