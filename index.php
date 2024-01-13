@@ -132,9 +132,7 @@
             throw new Exception("访问被拒绝", 403);
           }
         }else{
-          if(!in_array($path, $this -> _whiteListWithoutToken)){
-            throw new Exception("权限验证失败，请重新登录", 401);
-          }
+          throw new Exception("权限验证失败，请重新登录", 401);
         }
       }
     }

@@ -118,6 +118,13 @@
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
+      if(
+        ($body['menu_type'] === 'P' && $body['cache'] && !$body['is_link']) &&
+        !(isset($body['route_name']) && strlen($body['route_name']))
+      ){
+        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      }
+
       $parent = $this -> _sysMenuLib -> getMenuInfo($body['parent_id']);
       $parentMenuType = $parent['menu_type'];
       $menuType = $body['menu_type'];
