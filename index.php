@@ -111,14 +111,6 @@
       global $gUserName;
       $path = $_SERVER['PATH_INFO'];
 
-      $redis = new Redis();
-      $redis -> connect('127.0.0.1', 6379);
-      if($redis -> sismember('token_blacklist', $_SERVER['HTTP_X_TOKEN'])){
-        $redis -> close();
-        throw new Exception("权限验证失败，请重新登录", 401);
-      }
-      $redis -> close();
-
       if(empty($_SERVER['HTTP_X_TOKEN'])){
         if(!in_array($path, $this -> _whiteListWithoutToken)){
           throw new Exception("权限验证失败，请重新登录", 401);
@@ -127,6 +119,14 @@
         if(in_array($path, $this -> _whiteListWithoutToken)){
           return;
         }
+
+        $redis = new Redis();
+        $redis -> connect('127.0.0.1', 6379);
+        if($redis -> zScore('token_blacklist', $_SERVER['HTTP_X_TOKEN'])){
+          $redis -> close();
+          throw new Exception("权限验证失败，请重新登录", 401);
+        }
+        $redis -> close();
 
         $res = $this -> _jwt -> verifyToken($_SERVER['HTTP_X_TOKEN']);
 
