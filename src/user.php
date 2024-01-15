@@ -151,7 +151,6 @@
     }
 
     private function _handleUserLogout(){
-      // TODO: redis 定期清除
       $redis = new Redis();
       $redis -> connect('127.0.0.1', 6379);
       $redis -> zAdd('comodo_admin_token_blacklist', time(), $_SERVER['HTTP_X_TOKEN']);
