@@ -53,29 +53,35 @@ class JwtAuth {
       return false;
     }
 
-    $lifeTime = 7 * 24 * 60 * 60;
-    $refreshTime = 30 * 24 * 60 * 60;
+    $refreshTime = 30 * 60;
 
-    if(isset($payload['exp']) && $payload['exp'] < time() && ($payload['exp'] + $refreshTime) < time()){
+
+    if(isset($payload['exp']) && $payload['exp'] < time()){
       return false;
     }
 
-    if(isset($payload['exp']) && $payload['exp'] < time() && ($payload['exp'] + $refreshTime) > time()){
-      $newPayload = [
-        "iss" => "root",
-        "sub" => "comodo-admin",
-        "iat" => time(),
-        "nbf" => time(),
-        "exp" => time() + $lifeTime,
-        "jti" => md5(uniqid('JWT').time()),
-        "uid" => $payload['uid'],
-        "unm" => $payload['unm'],
-      ];
+    if(isset($payload['exp']) && $payload['exp'] > time() && ($payload['exp'] - $refreshTime) <= time()){
+      $newPayload = self::generatePayload($payload);
       $newToken = self::getToken($newPayload);
       setcookie('COMODOADMINTOKEN', $newToken, 0, '/');
     }
 
     return $payload;
+  }
+
+  public static function generatePayload($info){
+    $lifeTime = 2 * 60 * 60;
+
+    return [
+      "iss" => "root",
+      "sub" => "comodo-admin",
+      "iat" => time(),
+      "nbf" => time(),
+      "exp" => time() + $lifeTime,
+      "jti" => md5(uniqid('JWT').time()),
+      "uid" => $info['uid'],
+      "unm" => $info['unm'],
+    ];
   }
 
   private static function base64UrlEncode(string $input){

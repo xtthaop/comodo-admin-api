@@ -7,7 +7,7 @@
     }
 
     public function login($username, $password){
-      $sql = 'SELECT `user_id`, `username` FROM `sys_user` WHERE `username`=:username AND `password`=:password';
+      $sql = 'SELECT `user_id` as `uid`, `username` as `unm` FROM `sys_user` WHERE `username`=:username AND `password`=:password';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':username', $username);
       $stml -> bindParam(':password', $password);

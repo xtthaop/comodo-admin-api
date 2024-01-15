@@ -96,18 +96,7 @@
       $res = $this -> _userLib -> login($body['username'], $password);
   
       if(!empty($res)){
-        $lifeTime = 7 * 24 * 60 * 60;
-        $payload = [
-          "iss" => "root",
-          "sub" => "comodo",
-          "iat" => time(),
-          "nbf" => time(),
-          "exp" => time() + $lifeTime,
-          "jti" => md5(uniqid('JWT').time()),
-          "uid" => $res['user_id'],
-          "unm" => $res['username'],
-        ];
-  
+        $payload = $this -> _jwt -> generatePayload($res);
         $token = $this -> _jwt -> getToken($payload);
         $this -> _handleRecordLoginLog($body['username']);
   
@@ -162,6 +151,12 @@
     }
 
     private function _handleUserLogout(){
+      // TODO: 退出登录将 token 记录到 redis 黑名单，redis 定期清除
+      $redis = new Redis();
+      $redis -> connect('127.0.0.1', 6379);
+      $redis -> sadd('token_blacklist', $_SERVER['HTTP_X_TOKEN']);
+      $redis -> close();
+
       return [
         'code' => 0,
         'message' => 'success',
