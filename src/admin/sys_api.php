@@ -39,7 +39,7 @@
       if(
         !(isset($body['title']) && strlen($body['title'])) ||
         !(isset($body['path']) && strlen($body['path'])) ||
-        empty($body['type'])
+        !(isset($body['type']) && strlen($body['type']))
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }

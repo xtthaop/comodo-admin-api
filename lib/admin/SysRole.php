@@ -33,11 +33,9 @@
       $stml -> execute($arr);
       $total = $stml -> fetch()[0];
 
-      if(!empty($params['page'])){
-        $dataSql .= ' LIMIT :limit OFFSET :offset';
-        $arr[':limit'] = empty($params['page_size']) ? 10 : $params['page_size'];
-        $arr[':offset'] = empty($params['page']) ? 0 : ($params['page'] - 1) * $params['page_size'];
-      }
+      $dataSql .= ' ORDER BY `role_sort` LIMIT :limit OFFSET :offset';
+      $arr[':limit'] = $pageSize = empty($params['page_size']) ? 10 : $params['page_size'];
+      $arr[':offset'] = empty($params['page']) ? 0 : ((int)$params['page'] - 1) * (int)$pageSize;
 
       $stml = $this -> _db -> prepare($dataSql);
       $stml -> execute($arr);
@@ -49,8 +47,8 @@
       ];
     }
 
-    public function getRoleMenu($roleId){
-      $sql = 'SELECT * FROM `sys_menu` WHERE `menu_id` IN (SELECT `menu_id` FROM `sys_role_menu_rule` 
+    public function getRoleMenuIds($roleId){
+      $sql = 'SELECT `menu_id` FROM `sys_menu` WHERE `menu_id` IN (SELECT `menu_id` FROM `sys_role_menu_rule` 
               WHERE `role_id`=:role_id)';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':role_id', $roleId);
@@ -107,20 +105,6 @@
       $stml -> bindParam(':role_sort', $body['role_sort']);
       $stml -> bindParam(':status', $body['status']);
       $stml -> bindParam(':remark', $body['remark']);
-      $stml -> bindParam(':update_by', $gUserId);
-      $stml -> bindParam(':updated_at', $currentTime);
-      $stml -> execute();
-    }
-
-    public function changeRoleStatus($body){
-      global $gUserId;
-      $currentTime = date('Y-m-d H:i:s');
-
-      $sql = 'UPDATE `sys_role` SET `status`=:status, `update_by`=:update_by, `updated_at`=:updated_at WHERE 
-             `role_id`=:role_id';
-      $stml = $this -> _db -> prepare($sql);
-      $stml -> bindParam(':role_id', $body['role_id']);
-      $stml -> bindParam(':status', $body['status']);
       $stml -> bindParam(':update_by', $gUserId);
       $stml -> bindParam(':updated_at', $currentTime);
       $stml -> execute();

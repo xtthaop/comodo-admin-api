@@ -16,14 +16,7 @@
         case 'GET':
           return $this -> _handleGetSysRole();
         case 'PUT':
-          switch($params[2]){
-            case 'update_role':
-              return $this -> _handleUpdateSysRole();
-            case 'change_role_status':
-              return $this -> _handleChangeRoleStatus();
-            default:
-              throw new Exception('请求的资源不存在', 404);
-          }
+          return $this -> _handleUpdateSysRole();
         case 'DELETE':
           return $this -> _handleDeleteSysRole();
         default:
@@ -36,8 +29,10 @@
       $res = $this -> _sysRoleLib -> getSysRoleList($params);
 
       foreach($res['data'] as &$value){
-        $menuList = $this -> _sysRoleLib -> getRoleMenu($value['role_id']);
-        $value['menu_list'] = $menuList;
+        $menuList = $this -> _sysRoleLib -> getRoleMenuIds($value['role_id']);
+        $value['menu_ids'] = array_reduce($menuList, function($result, $value){
+          return array_merge($result, array_values($value));
+        }, array());
       }
 
       return [
@@ -122,29 +117,6 @@
 
       $this -> _sysRoleLib -> updateRole($body);
       $this -> _handleSetRoleMenu($body['role_id'], $body['menu_ids']);
-      return [
-        'code' => 0,
-        'message' => 'success',
-      ];
-    }
-
-    private function _handleChangeRoleStatus(){
-      $raw = file_get_contents('php://input');
-      $body = json_decode($raw, true);
-
-      if(
-        !(isset($body['status']) && strlen($body['status'])) || 
-        empty($body['role_id'])
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
-      }
-
-      $roleInfo = $this -> _sysRoleLib -> getRoleInfo($body['role_id']);
-      if($roleInfo['role_key'] === 'admin'){
-        throw new Exception('修改失败（包含不允许被修改的角色）', ErrorCode::ROLE_CANT_UPDATE);
-      }
-
-      $this -> _sysRoleLib -> changeRoleStatus($body);
       return [
         'code' => 0,
         'message' => 'success',

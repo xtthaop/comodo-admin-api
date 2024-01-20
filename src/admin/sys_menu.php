@@ -105,7 +105,8 @@
     private function _checkForRequired($body){
       if(
         !(isset($body['title']) && strlen($body['title'])) ||
-        !(isset($body['menu_type']) && strlen($body['menu_type']))
+        !(isset($body['menu_type']) && strlen($body['menu_type'])) ||
+        !(isset($body['visible']) && strlen($body['visible']))
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
@@ -188,6 +189,9 @@
         case 'B': {
           ['permission' => $permission, 'apis' => $apis] = $body;
           return array_merge($baseObj, ['visible' => 2, 'permission' => $permission, 'apis' => $apis]);
+        }
+        default: {
+          throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
         }
       }
     }
