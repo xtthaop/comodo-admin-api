@@ -109,9 +109,10 @@
       if($roleInfo['role_key'] === 'admin'){
         if(
           $body['role_key'] != $roleInfo['role_key'] ||
-          $body['status'] != $roleInfo['status']
+          $body['status'] != $roleInfo['status'] ||
+          !empty($body['menu_ids'])
         ){
-          throw new Exception('修改失败（包含不允许被修改的角色）', ErrorCode::ROLE_CANT_UPDATE);
+          throw new Exception('修改失败（不允许被修改的角色）', ErrorCode::ROLE_CANT_UPDATE);
         }
       }
 
