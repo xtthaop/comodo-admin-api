@@ -228,7 +228,7 @@
   $sysApi = new SysApi($sysApiLib);
   $sysMenu = new SysMenu($sysMenuLib);
   $sysRole = new SysRole($sysRoleLib);
-  $sysUser = new SysUser($sysUserLib);
+  $sysUser = new SysUser($sysUserLib, $sysRoleLib, $jwt);
   $user = new User($userLib, $captcha, $jwt, $sysUserLib, $sysLogLib, $client);
   $permission = new Permission($permissionLib, $sysUserLib, $sysMenuLib);
   $sysLog = new SysLog($sysLogLib, $client);

@@ -49,7 +49,7 @@
         return true;
       }
 
-      if($this -> _sysUserLib -> checkUserIsAdmin($gUserId)){
+      if($this -> _sysUserLib -> checkUserIsAdminRole($gUserId)){
         return true;
       }
 
@@ -64,7 +64,7 @@
     private function _handleGetDynamicRoutes(){
       global $gUserId;
 
-      if($this -> _sysUserLib -> checkUserIsAdmin($gUserId)){
+      if($this -> _sysUserLib -> checkUserIsAdminRole($gUserId)){
         $dynamicRoutes = $this -> _generateAllRoutes();
       }else{
         $dynamicRoutes = $this -> _generateAPermissionRoutes();

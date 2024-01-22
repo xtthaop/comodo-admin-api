@@ -96,4 +96,8 @@ class JwtAuth {
     }
     return base64_decode(strtr($input, '-_', '+/'));
   }
+
+  public function md5Password($string, $key = 'comodo-admin'){
+    return md5($string . $key);
+  }
 }

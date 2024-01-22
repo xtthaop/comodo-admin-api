@@ -1,9 +1,13 @@
 <?php
   class SysUser {
     private $_sysUserLib;
+    private $_sysRoleLib;
+    private $_jwt;
 
-    public function __construct(SysUserLib $sysUserLib){
+    public function __construct(SysUserLib $sysUserLib, SysRoleLib $sysRoleLib, JwtAuth $jwt){
       $this -> _sysUserLib = $sysUserLib;
+      $this -> _sysRoleLib = $sysRoleLib;
+      $this -> _jwt = $jwt;
     }
 
     public function handleSysUser(){
@@ -19,8 +23,6 @@
           switch($params[2]){
             case 'update_user':
               return $this -> _handleUpdateSysUser();
-            case 'change_user_status':
-              return $this -> _handleChangeUserStatus();
             case 'reset_password':
               return $this -> _handleResetPassword();
             default:
@@ -38,8 +40,10 @@
       $res = $this -> _sysUserLib -> getSysUserList($params);
 
       foreach($res['data'] as &$value){
-        $roleList = $this -> _sysUserLib -> getUserRole($value['user_id']);
-        $value['role_list'] = $roleList;
+        $roleList = $this -> _sysUserLib -> getUserRoleIds($value['user_id']);
+        $value['role_ids'] = array_reduce($roleList, function($result, $value){
+          return array_merge($result, array_values($value));
+        }, array());
         unset($value['password']);
       }
 
@@ -63,7 +67,7 @@
 
       $this -> _checkForRequired($body);
 
-      $body['password'] = $this -> _md5($body['password']);
+      $body['password'] = $this -> _jwt -> md5Password($body['password']);
       $userId = $this -> _sysUserLib -> addUser($body);
       $this -> _handleSetUserRole($userId, $body['role_ids']);
       return [
@@ -72,15 +76,17 @@
       ];
     }
 
-    private function _md5($string, $key = 'CmDo@oo!19@96#'){
-      return md5($string . $key);
-    }
-
     private function _handleSetUserRole($userId, $roleIds){
       $this -> _sysUserLib -> clearUserRole($userId);
       if(empty($roleIds)){
         return;
       }else{
+        foreach($roleIds as $value){
+          $isUnactived = $this -> _sysRoleLib -> getRoleInfo($value)['status'];
+          if($isUnactived === 0){
+            throw new Exception('所选角色中存在被禁用的角色', ErrorCode::USER_ROLE_UNACTIVED);
+          }
+        }
         foreach($roleIds as $value){
           $this -> _sysUserLib -> setUserRole($userId, $value);
         }
@@ -91,7 +97,7 @@
       if(
         !(isset($body['username']) && strlen($body['username'])) ||
         !(isset($body['phone']) && strlen($body['phone'])) ||
-        !(isset($body['email']) && strlen($body['email']))
+        !(isset($body['nickname']) && strlen($body['nickname']))
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
@@ -101,7 +107,7 @@
       $username = !(isset($body['username']) && strlen($body['username'])) ? null : $body['username'];
       $existedUsernameCount = $this -> _sysUserLib -> getExistedCount('username', $username, $userId);
       if($existedUsernameCount > 0){
-        throw new Exception('用户名称已被使用', ErrorCode::USER_NAME_EXISTED);
+        throw new Exception('登录名已被使用', ErrorCode::USER_NAME_EXISTED);
       }
     }
 
@@ -125,56 +131,28 @@
     }
 
     private function _handlePreventUpdate($body){
-      $isAdmin = $this -> _sysUserLib -> checkUserIsAdmin($body['user_id']);
+      $isAdmin = $this -> _sysUserLib -> checkUserIsAdminRole($body['user_id']);
       if(!$isAdmin){
         return;
       }else{
-        $adminUser = $this -> _sysUserLib -> getAdminUser();
-        if(count($adminUser) === 1 && $adminUser[0]['user_id'] === $body['user_id']){
+        $userInfo = $this -> _sysUserLib -> getUserInfo($body['user_id']);
+        if($userInfo['username'] === 'admin'){
           $userInfo = $this -> _sysUserLib -> getUserInfo($body['user_id']);
-          if(
-            empty($body['role_ids']) ||
-            !($this -> _sysUserLib -> checkForAdmin($body['role_ids'])) ||
-            $body['status'] != $userInfo['status']
-          ){
-            throw new Exception('修改失败（包含不允许被修改的用户）', ErrorCode::USER_CANT_UPDATE);
+          $roleList = $this -> _sysUserLib -> getUserRoleIds($body['user_id']);
+          $userInfo['role_ids'] = array_reduce($roleList, function($result, $value){
+            return array_merge($result, array_values($value));
+          }, array());
+          if($userInfo['username'] === 'admin'){
+            if(
+              $body['username'] != $userInfo['username'] ||
+              $body['status'] != $userInfo['status'] ||
+              json_encode($body['role_ids']) != json_encode($userInfo['role_ids'])
+            ){
+              throw new Exception('修改失败（不允许被修改的用户）', ErrorCode::USER_CANT_UPDATE);
+            }
           }
         }
       }
-    }
-
-    private function _handlePreventChangeStatus($body){
-      $isAdmin = $this -> _sysUserLib -> checkUserIsAdmin($body['user_id']);
-      if(!$isAdmin){
-        return;
-      }else{
-        $adminUser = $this -> _sysUserLib -> getAdminUser();
-        if(count($adminUser) === 1 && $adminUser[0]['user_id'] === $body['user_id']){
-          $userInfo = $this -> _sysUserLib -> getUserInfo($body['user_id']);
-          if($body['status'] != $userInfo['status']){
-            throw new Exception('修改失败（包含不允许被修改的用户）', ErrorCode::USER_CANT_UPDATE);
-          }
-        }
-      }
-    }
-
-    private function _handleChangeUserStatus(){
-      $raw = file_get_contents('php://input');
-      $body = json_decode($raw, true);
-
-      if(
-        !(isset($body['status']) && strlen($body['status'])) || 
-        empty($body['user_id'])
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
-      }
-
-      $this -> _handlePreventChangeStatus($body);
-      $this -> _sysUserLib -> changeRoleStatus($body);
-      return [
-        'code' => 0,
-        'message' => 'success',
-      ];
     }
 
     private function _handleDeleteSysUser(){
@@ -194,12 +172,12 @@
     }
 
     private function _handlePreventDelete($userId){
-      $isAdmin = $this -> _sysUserLib -> checkUserIsAdmin($userId);
+      $isAdmin = $this -> _sysUserLib -> checkUserIsAdminRole($userId);
       if(!$isAdmin){
         return;
       }else{
-        $adminUser = $this -> _sysUserLib -> getAdminUser();
-        if(count($adminUser) === 1 && $adminUser[0]['user_id'] === $userId){
+        $userInfo = $this -> _sysUserLib -> getUserInfo($userId);
+        if($userInfo['username'] === 'admin'){
           throw new Exception('用户不能被删除', ErrorCode::USER_CANT_DELETE);
         }
       }
@@ -216,7 +194,7 @@
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
-      $body['new_password'] = $this -> _md5($body['new_password']);
+      $body['new_password'] = $this -> _jwt -> md5Password($body['new_password']);
       $this -> _sysUserLib -> resetPassword($body);
       return [
         'code' => 0,

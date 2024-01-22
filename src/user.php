@@ -92,7 +92,7 @@
         throw new Exception("密码不能为空", ErrorCode::PASSWOED_CANNOT_EMPTY);
       }
 
-      $password = $this -> _md5($body['password']);
+      $password = $this -> _jwt -> md5Password($body['password']);
       $res = $this -> _userLib -> login($body['username'], $password);
   
       if(!empty($res)){
@@ -110,10 +110,6 @@
       }else{
         throw new Exception("用户名与密码不匹配", ErrorCode::USER_VERIFY_FAILED);
       }
-    }
-  
-    private function _md5($string, $key = 'CmDo@oo!19@96#'){
-      return md5($string . $key);
     }
 
     private function _handleRecordLoginLog($username){
@@ -133,7 +129,7 @@
         $res['roles'] = array('');
       }
 
-      if($this -> _sysUserLib -> checkUserIsAdmin($gUserId)){
+      if($this -> _sysUserLib -> checkUserIsAdminRole($gUserId)){
         $res['action_permission'] = array('*:*:*');
       }else{
         $res['action_permission'] = $this -> _userLib -> getUserActionPermission($gUserId);
@@ -175,11 +171,11 @@
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
-      $oldPassword = $this -> _md5($body['old_password']);
+      $oldPassword = $this -> _jwt -> md5Password($body['old_password']);
       $res = $this -> _userLib -> verifyOldPassword($gUserId, $oldPassword);
 
       if(!empty($res)){
-        $body['new_password'] = $this -> _md5($body['new_password']);
+        $body['new_password'] = $this -> _jwt -> md5Password($body['new_password']);
         $this -> _userLib -> changePassword($gUserId, $body);
       }else{
         throw new Exception('旧密码验证失败', ErrorCode::OLD_PASSWORD_VERIFY_FAILED);

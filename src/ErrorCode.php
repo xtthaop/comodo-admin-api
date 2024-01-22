@@ -21,4 +21,5 @@
     const PASSWOED_CANNOT_EMPTY = 4020; // 密码不能为空
     const USER_VERIFY_FAILED = 4021; // 用户名和密码不匹配
     const OLD_PASSWORD_VERIFY_FAILED = 4022; // 旧密码验证失败
+    const USER_ROLE_UNACTIVED = 4023; // 角色被禁用
   }

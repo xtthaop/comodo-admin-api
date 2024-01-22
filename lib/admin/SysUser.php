@@ -34,8 +34,8 @@
       $total = $stml -> fetch()[0];
 
       $dataSql .= ' LIMIT :limit OFFSET :offset';
-      $arr[':limit'] = empty($params['page_size']) ? 10 : $params['page_size'];
-      $arr[':offset'] = empty($params['page']) ? 0 : ($params['page'] - 1) * $params['page_size'];
+      $arr[':limit'] = $pageSize = empty($params['page_size']) ? 10 : $params['page_size'];
+      $arr[':offset'] = empty($params['page']) ? 0 : ((int)$params['page'] - 1) * (int)$pageSize;
 
       $stml = $this -> _db -> prepare($dataSql);
       $stml -> execute($arr);
@@ -47,8 +47,8 @@
       ];
     }
 
-    public function getUserRole($userId){
-      $sql = 'SELECT * FROM `sys_role` WHERE `role_id` IN (SELECT `role_id` FROM `sys_user_role_rule` 
+    public function getUserRoleIds($userId){
+      $sql = 'SELECT `role_id` FROM `sys_role` WHERE `role_id` IN (SELECT `role_id` FROM `sys_user_role_rule` 
               WHERE `user_id`=:user_id)';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':user_id', $userId);
@@ -61,12 +61,13 @@
       global $gUserId;
       $currentTime = date('Y-m-d H:i:s');
 
-      $sql = 'INSERT INTO `sys_user` (`username`, `password`, `phone`, `email`, `sex`, `remark`, 
-             `status`, `create_by`, `created_at`) VALUES (:username, :password, :phone, :email, :sex, 
+      $sql = 'INSERT INTO `sys_user` (`username`, `password`, `nickname`, `phone`, `email`, `sex`, `remark`, 
+             `status`, `create_by`, `created_at`) VALUES (:username, :password, :nickname, :phone, :email, :sex, 
              :remark, :status, :create_by, :created_at)';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':username', $body['username']);
       $stml -> bindParam(':password', $body['password']);
+      $stml -> bindParam(':nickname', $body['nickname']);
       $stml -> bindParam(':phone', $body['phone']);
       $stml -> bindParam(':email', $body['email']);
       $stml -> bindParam(':sex', $body['sex']);
@@ -98,30 +99,17 @@
       global $gUserId;
       $currentTime = date('Y-m-d H:i:s');
 
-      $sql = 'UPDATE `sys_user` SET `username`=:username, `phone`=:phone, `email`=:email, `sex`=:sex, 
+      $sql = 'UPDATE `sys_user` SET `username`=:username, `phone`=:phone, `nickname`=:nickname, `email`=:email, `sex`=:sex, 
              `status`=:status, `remark`=:remark, `update_by`=:update_by, `updated_at`=:updated_at WHERE 
              `user_id`=:user_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':user_id', $body['user_id']);
       $stml -> bindParam(':username', $body['username']);
       $stml -> bindParam(':phone', $body['phone']);
+      $stml -> bindParam(':nickname', $body['nickname']);
       $stml -> bindParam(':email', $body['email']);
       $stml -> bindParam(':sex', $body['sex']);
       $stml -> bindParam(':remark', $body['remark']);
-      $stml -> bindParam(':status', $body['status']);
-      $stml -> bindParam(':update_by', $gUserId);
-      $stml -> bindParam(':updated_at', $currentTime);
-      $stml -> execute();
-    }
-
-    public function changeRoleStatus($body){
-      global $gUserId;
-      $currentTime = date('Y-m-d H:i:s');
-
-      $sql = 'UPDATE `sys_user` SET `status`=:status, `update_by`=:update_by, `updated_at`=:updated_at WHERE 
-             `user_id`=:user_id';
-      $stml = $this -> _db -> prepare($sql);
-      $stml -> bindParam(':user_id', $body['user_id']);
       $stml -> bindParam(':status', $body['status']);
       $stml -> bindParam(':update_by', $gUserId);
       $stml -> bindParam(':updated_at', $currentTime);
@@ -159,31 +147,11 @@
       return $result[0];
     }
 
-    public function checkUserIsAdmin($userId){
+    public function checkUserIsAdminRole($userId){
       $sql = 'SELECT COUNT(*) FROM `sys_user_role_rule` WHERE `user_id`=:user_id AND `role_id` IN 
              (SELECT `role_id` FROM `sys_role` WHERE `role_key`="admin")';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':user_id', $userId);
-      $stml -> execute();
-      $result = $stml -> fetch();
-      return $result[0];
-    }
-
-    public function getAdminUser(){
-      $sql = 'SELECT `user_id`, (SELECT COUNT(*) FROM `sys_user_role_rule` AS r WHERE 
-             r.user_id=u.user_id AND r.role_id IN (SELECT `role_id` FROM `sys_role` WHERE 
-             `role_key`="admin")) AS `admin_role_count` FROM `sys_user` AS u WHERE `status`=1
-             HAVING `admin_role_count` > 0';
-      $stml = $this -> _db -> prepare($sql);
-      $stml -> execute();
-      $result = $stml -> fetchAll(PDO::FETCH_ASSOC);
-      return $result;
-    }
-
-    public function checkForAdmin($roleIds){
-      $in = implode(',', $roleIds);
-      $sql = 'SELECT COUNT(*) FROM `sys_role` WHERE `role_id` IN (' . $in . ') AND `role_key`="admin"';
-      $stml = $this -> _db -> prepare($sql);
       $stml -> execute();
       $result = $stml -> fetch();
       return $result[0];
