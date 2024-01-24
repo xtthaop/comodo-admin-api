@@ -147,10 +147,7 @@
     }
 
     private function _handleUserLogout(){
-      $redis = new Redis();
-      $redis -> connect('127.0.0.1', 6379);
-      $redis -> zAdd('comodo_admin_token_blacklist', time(), $_SERVER['HTTP_X_TOKEN']);
-      $redis -> close();
+      $this -> _jwt -> addTokenToBlack($_SERVER['HTTP_X_TOKEN']);
 
       return [
         'code' => 0,

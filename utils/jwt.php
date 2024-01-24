@@ -100,4 +100,11 @@ class JwtAuth {
   public function md5Password($string, $key = 'comodo-admin'){
     return md5($string . $key);
   }
+
+  public function addTokenToBlack($token) {
+    $redis = new Redis();
+    $redis -> connect('127.0.0.1', 6379);
+    $redis -> zAdd('comodo_admin_token_blacklist', time(), $token);
+    $redis -> close();
+  }
 }

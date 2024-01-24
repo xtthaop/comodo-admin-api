@@ -134,7 +134,8 @@
           $gUserId = $res['uid'];
           $gUserName = $res['unm'];
           if(empty($this -> _permission -> handleCheckUserEnabled())){
-            throw new Exception("权限验证失败，请重新登录", 401);
+            $this -> _jwt -> addTokenToBlack($_SERVER['HTTP_X_TOKEN']);
+            throw new Exception("您的账户已被禁用", ErrorCode::USER_HAS_UNENABLED);
           }
           if(!($this -> _permission -> checkApiPermission())){
             throw new Exception("访问被拒绝", 403);

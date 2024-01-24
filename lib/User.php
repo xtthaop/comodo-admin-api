@@ -17,7 +17,7 @@
     }
 
     public function getUserInfo($userId){
-      $sql = 'SELECT `username` FROM `sys_user` WHERE `user_id`=:user_id';
+      $sql = 'SELECT `nickname` FROM `sys_user` WHERE `user_id`=:user_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':user_id', $userId);
       $stml -> execute();
@@ -39,7 +39,7 @@
       $sql = 'SELECT DISTINCT `permission` FROM `sys_menu` WHERE `menu_id` IN 
              (SELECT `menu_id` FROM `sys_role_menu_rule` WHERE role_id IN 
              (SELECT ur.role_id FROM `sys_user_role_rule` as ur INNER JOIN `sys_role` as r ON ur.role_id=r.role_id
-             WHERE `user_id`=:user_id AND `status`=1))';
+             WHERE `user_id`=:user_id AND `status`=1)) AND `permission` IS NOT NULL';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':user_id', $userId);
       $stml -> execute();
