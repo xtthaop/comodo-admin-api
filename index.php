@@ -120,13 +120,10 @@
           return;
         }
 
-        $redis = new Redis();
-        $redis -> connect('127.0.0.1', 6379);
-        if($redis -> zScore('token_blacklist', $_SERVER['HTTP_X_TOKEN'])){
-          $redis -> close();
+        $tokenInBlack = $this -> _jwt -> checkTokenInBlack($_SERVER['HTTP_X_TOKEN']);
+        if($tokenInBlack){
           throw new Exception("权限验证失败，请重新登录", 401);
         }
-        $redis -> close();
 
         $res = $this -> _jwt -> verifyToken($_SERVER['HTTP_X_TOKEN']);
 

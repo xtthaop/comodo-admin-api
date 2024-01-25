@@ -1,6 +1,7 @@
 <?php
 
 class JwtAuth {
+  private static $tokenRedisKey = 'comodo_admin_token_blacklist';
 
   private static $header = [
     'alg' => 'HS256',
@@ -104,7 +105,15 @@ class JwtAuth {
   public function addTokenToBlack($token) {
     $redis = new Redis();
     $redis -> connect('127.0.0.1', 6379);
-    $redis -> zAdd('comodo_admin_token_blacklist', time(), $token);
+    $redis -> zAdd(self::$tokenRedisKey, time(), $token);
     $redis -> close();
+  }
+
+  public function checkTokenInBlack($token) {
+    $redis = new Redis();
+    $redis -> connect('127.0.0.1', 6379);
+    $res = $redis -> zScore(self::$tokenRedisKey, $token);
+    $redis -> close();
+    return $res;
   }
 }
