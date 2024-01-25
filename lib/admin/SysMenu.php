@@ -146,4 +146,12 @@
       $result = $stml -> fetch();
       return $result;
     }
+
+    public function getAllSysMenuPath(){
+      $sql = 'SELECT DISTINCT `path` FROM `sys_menu` WHERE `path` IS NOT NULL';
+      $stml = $this -> _db -> prepare($sql);
+      $stml -> execute();
+      $result = $stml -> fetchAll(PDO::FETCH_NUM);
+      return $result;
+    }
   }

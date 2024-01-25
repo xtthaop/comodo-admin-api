@@ -69,11 +69,19 @@
       }else{
         $dynamicRoutes = $this -> _generateAPermissionRoutes();
       }
+
+      $allPath = $this -> _sysMenuLib -> getAllSysMenuPath();
+      $allPath = array_reduce($allPath, function($result, $value){
+        return array_merge($result, array_values($value));
+      }, array());
       
       return [
         'code' => 0,
         'message' => 'success',
-        'data' => $dynamicRoutes,
+        'data' => [
+          'dynamic_routes' => $dynamicRoutes,
+          'all_path' => $allPath,
+        ],
       ];
     }
 
