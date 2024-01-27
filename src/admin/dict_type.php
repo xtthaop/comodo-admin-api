@@ -26,7 +26,7 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      $this -> _checkForRequired($body['dict_name'], $body['dict_type'], '');
+      $this -> _checkForRequired($body);
 
       $this -> _dictTypeLib -> addDictType($body);
       return [
@@ -43,7 +43,7 @@
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
-      $this -> _checkForRequired($body['dict_name'], $body['dict_type'], $body['dict_id']);
+      $this -> _checkForRequired($body);
 
       $this -> _dictTypeLib -> updateDictType($body);
       return [
@@ -52,20 +52,23 @@
       ];
     }
 
-    private function _checkForRequired($dictName, $dictType, $dictId){
+    private function _checkForRequired($body){
       if(
-        !(isset($dictName) && strlen($dictName)) ||
-        !(isset($dictType) && strlen($dictType))
+        !(isset($body['dict_name']) && strlen($body['dict_name'])) ||
+        !(isset($body['dict_type']) && strlen($body['dict_type'])) ||
+        !(isset($body['status']) && strlen($body['status']))
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
-      $existedNameCount = $this -> _dictTypeLib -> getExistedCount('dict_name', $dictName, $dictId);
+      $dictId = $body['dict_id'] ? $body['dict_id'] : '';
+
+      $existedNameCount = $this -> _dictTypeLib -> getExistedCount('dict_name', $body['dict_name'], $dictId);
       if($existedNameCount > 0){
         throw new Exception('字典名称已存在', ErrorCode::DICT_NAME_EXISTED);
       }
 
-      $existedTypeCount = $this -> _dictTypeLib -> getExistedCount('dict_type', $dictType, $dictId);
+      $existedTypeCount = $this -> _dictTypeLib -> getExistedCount('dict_type', $body['dict_type'], $dictId);
       if($existedTypeCount > 0){
         throw new Exception('字典类型已存在', ErrorCode::DICT_TYPE_EXISTED);
       }

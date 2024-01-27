@@ -97,7 +97,8 @@
       if(
         !(isset($body['username']) && strlen($body['username'])) ||
         !(isset($body['phone']) && strlen($body['phone'])) ||
-        !(isset($body['nickname']) && strlen($body['nickname']))
+        !(isset($body['nickname']) && strlen($body['nickname'])) ||
+        !(isset($body['status']) && strlen($body['status']))
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }

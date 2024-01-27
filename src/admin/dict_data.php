@@ -49,9 +49,22 @@
         !(isset($body['dict_data_label']) && strlen($body['dict_data_label'])) || 
         !(isset($body['dict_data_value']) && strlen($body['dict_data_value'])) ||
         !(isset($body['dict_data_sort']) && strlen($body['dict_data_sort'])) ||
+        !(isset($body['status']) && strlen($body['status'])) ||
         empty($body['dict_id'])
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      }
+
+      $dictDataId = $body['dict_data_id'] ? $body['dict_data_id'] : '';
+
+      $existedNameCount = $this -> _dictDataLib -> getExistedCount('dict_data_label', $body['dict_data_label'], $dictDataId);
+      if($existedNameCount > 0){
+        throw new Exception('标签名称已存在', ErrorCode::DICT_DATA_LABEL_EXISTED);
+      }
+
+      $existedTypeCount = $this -> _dictDataLib -> getExistedCount('dict_data_value', $body['dict_data_value'], $dictDataId);
+      if($existedTypeCount > 0){
+        throw new Exception('键值已存在', ErrorCode::DICT_DATA_VALUE_EXISTED);
       }
     }
 

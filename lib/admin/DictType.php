@@ -34,8 +34,8 @@
       $total = $stml -> fetch()[0];
 
       $dataSql .= ' LIMIT :limit OFFSET :offset';
-      $arr[':limit'] = empty($params['page_size']) ? 10 : $params['page_size'];
-      $arr[':offset'] = empty($params['page']) ? 0 : ($params['page'] - 1) * $params['page_size'];
+      $arr[':limit'] = $pageSize = empty($params['page_size']) ? 10 : $params['page_size'];
+      $arr[':offset'] = empty($params['page']) ? 0 : ((int)$params['page'] - 1) * (int)$pageSize;
 
       $stml = $this -> _db -> prepare($dataSql);
       $stml -> execute($arr);

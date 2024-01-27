@@ -30,8 +30,8 @@
       $total = $stml -> fetch()[0];
 
       $dataSql .= ' ORDER BY `dict_data_sort` LIMIT :limit OFFSET :offset';
-      $arr[':limit'] = empty($params['page_size']) ? 10 : $params['page_size'];
-      $arr[':offset'] = empty($params['page']) ? 0 : ($params['page'] - 1) * $params['page_size'];
+      $arr[':limit'] = $pageSize = empty($params['page_size']) ? 10 : $params['page_size'];
+      $arr[':offset'] = empty($params['page']) ? 0 : ((int)$params['page'] - 1) * (int)$pageSize;
 
       $stml = $this -> _db -> prepare($dataSql);
       $stml -> execute($arr);
@@ -41,6 +41,16 @@
         'data' => $data,
         'total' => $total,
       ];
+    }
+
+    public function getExistedCount($column, $value, $id){
+      $sql = 'SELECT COUNT(*) FROM `sys_dict_data` WHERE ' . $column . '=:' . $column . ' AND `dict_data_id`!=:dict_data_id';
+      $stml = $this -> _db -> prepare($sql);
+      $stml -> bindParam(':' . $column, $value);
+      $stml -> bindParam(':dict_data_id', $id);
+      $stml -> execute();
+      $result = $stml -> fetch();
+      return $result[0];
     }
 
     public function addDictData($body){
