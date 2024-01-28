@@ -57,12 +57,12 @@
 
       $dictDataId = $body['dict_data_id'] ? $body['dict_data_id'] : '';
 
-      $existedNameCount = $this -> _dictDataLib -> getExistedCount('dict_data_label', $body['dict_data_label'], $dictDataId);
+      $existedNameCount = $this -> _dictDataLib -> getExistedCount('dict_data_label', $body['dict_data_label'], $dictDataId, $body['dict_id']);
       if($existedNameCount > 0){
         throw new Exception('标签名称已存在', ErrorCode::DICT_DATA_LABEL_EXISTED);
       }
 
-      $existedTypeCount = $this -> _dictDataLib -> getExistedCount('dict_data_value', $body['dict_data_value'], $dictDataId);
+      $existedTypeCount = $this -> _dictDataLib -> getExistedCount('dict_data_value', $body['dict_data_value'], $dictDataId, $body['dict_id']);
       if($existedTypeCount > 0){
         throw new Exception('键值已存在', ErrorCode::DICT_DATA_VALUE_EXISTED);
       }

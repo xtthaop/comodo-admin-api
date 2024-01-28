@@ -43,11 +43,13 @@
       ];
     }
 
-    public function getExistedCount($column, $value, $id){
-      $sql = 'SELECT COUNT(*) FROM `sys_dict_data` WHERE ' . $column . '=:' . $column . ' AND `dict_data_id`!=:dict_data_id';
+    public function getExistedCount($column, $value, $id, $dictId){
+      $sql = 'SELECT COUNT(*) FROM `sys_dict_data` WHERE ' . $column . '=:' . $column . ' AND `dict_data_id`!=:dict_data_id 
+              AND `dict_id`=:dict_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':' . $column, $value);
       $stml -> bindParam(':dict_data_id', $id);
+      $stml -> bindParam(':dict_id', $dictId);
       $stml -> execute();
       $result = $stml -> fetch();
       return $result[0];
