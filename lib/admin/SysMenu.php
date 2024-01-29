@@ -20,6 +20,8 @@
         $arr[':visible'] = $params['visible'];
       }
 
+      $sql .= ' ORDER BY `created_at` DESC';
+
       $stml = $this -> _db -> prepare($sql);
       $stml -> execute($arr);
       $result = $stml -> fetchAll(PDO::FETCH_ASSOC);

@@ -1,10 +1,12 @@
 <?php
   class SysLog {
     private $_sysLogLib;
+    private $_sysApiLib;
     private $_client;
 
-    public function __construct(SysLogLib $sysLogLib, Client $client){
+    public function __construct(SysLogLib $sysLogLib, SysApiLib $sysApiLib, Client $client){
       $this -> _sysLogLib = $sysLogLib;
+      $this -> _sysApiLib = $sysApiLib;
       $this -> _client = $client;
     }
 
@@ -40,7 +42,8 @@
       $ipaddr = $this -> _client -> getIpAddress();
       $type = $_SERVER['REQUEST_METHOD'];
       $path = $_SERVER['PATH_INFO'];
-      $this -> _sysLogLib -> recordOperationLog($operator, $ipaddr, $type, $path, $latencyTime, $operationTime);
+      $operation = $this -> _sysApiLib -> getApiTitle($path, $type);
+      $this -> _sysLogLib -> recordOperationLog($operator, $operation, $ipaddr, $type, $path, $latencyTime, $operationTime);
     }
 
     private function _handleGetLoginLog(){

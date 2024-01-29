@@ -33,7 +33,7 @@
       $stml -> execute($arr);
       $total = $stml -> fetch()[0];
 
-      $dataSql .= ' LIMIT :limit OFFSET :offset';
+      $dataSql .= ' ORDER BY `created_at` DESC LIMIT :limit OFFSET :offset';
       $arr[':limit'] = $pageSize = empty($params['page_size']) ? 10 : $params['page_size'];
       $arr[':offset'] = empty($params['page']) ? 0 : ((int)$params['page'] - 1) * (int)$pageSize;
 

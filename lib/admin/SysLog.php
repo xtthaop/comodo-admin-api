@@ -43,8 +43,8 @@
 
       $dataSql .= ' ORDER BY `login_time` DESC';
       $dataSql .= ' LIMIT :limit OFFSET :offset';
-      $arr[':limit'] = empty($params['page_size']) ? 10 : $params['page_size'];
-      $arr[':offset'] = empty($params['page']) ? 0 : ($params['page'] - 1) * $params['page_size'];
+      $arr[':limit'] = $pageSize = empty($params['page_size']) ? 10 : $params['page_size'];
+      $arr[':offset'] = empty($params['page']) ? 0 : ((int)$params['page'] - 1) * (int)$pageSize;
 
       $stml = $this -> _db -> prepare($dataSql);
       $stml -> execute($arr);
@@ -63,11 +63,12 @@
       $stml -> execute();
     }
 
-    public function recordOperationLog($operator, $ipaddr, $type, $path, $latencyTime, $operationTime){
-      $sql = 'INSERT INTO `sys_operation_log` (`operator`, `ipaddr`, `type`, `path`, `latency_time`, `operation_time`)
-             VALUES (:operator, :ipaddr, :type, :path, :latency_time, :operation_time)';
+    public function recordOperationLog($operator, $operation, $ipaddr, $type, $path, $latencyTime, $operationTime){
+      $sql = 'INSERT INTO `sys_operation_log` (`operator`, `operation`, `ipaddr`, `type`, `path`, `latency_time`, `operation_time`)
+             VALUES (:operator, :operation, :ipaddr, :type, :path, :latency_time, :operation_time)';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':operator', $operator);
+      $stml -> bindParam(':operation', $operation);
       $stml -> bindParam(':ipaddr', $ipaddr);
       $stml -> bindParam(':type', $type);
       $stml -> bindParam(':path', $path);
@@ -94,8 +95,8 @@
 
       $dataSql .= ' ORDER BY `operation_time` DESC';
       $dataSql .= ' LIMIT :limit OFFSET :offset';
-      $arr[':limit'] = empty($params['page_size']) ? 10 : $params['page_size'];
-      $arr[':offset'] = empty($params['page']) ? 0 : ($params['page'] - 1) * $params['page_size'];
+      $arr[':limit'] = $pageSize = empty($params['page_size']) ? 10 : $params['page_size'];
+      $arr[':offset'] = empty($params['page']) ? 0 : ((int)$params['page'] - 1) * (int)$pageSize;
 
       $stml = $this -> _db -> prepare($dataSql);
       $stml -> execute($arr);

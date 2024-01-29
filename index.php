@@ -229,7 +229,7 @@
   $sysUser = new SysUser($sysUserLib, $sysRoleLib, $jwt);
   $user = new User($userLib, $captcha, $jwt, $sysUserLib, $sysLogLib, $client);
   $permission = new Permission($permissionLib, $sysUserLib, $sysMenuLib);
-  $sysLog = new SysLog($sysLogLib, $client);
+  $sysLog = new SysLog($sysLogLib, $sysApiLib, $client);
 
   $restful = new Restful(
     $dictType, 
