@@ -25,4 +25,6 @@
     const USER_HAS_UNENABLED = 4024; // 账户被禁用
     const DICT_DATA_LABEL_EXISTED = 4025; // 字典数据标签已存在
     const DICT_DATA_VALUE_EXISTED = 4026; // 字典数据值已存在
+
+    const PREVIEW_NOT_ALLOWED_METHOD = 45000; // 预览版不允许的请求方法
   }

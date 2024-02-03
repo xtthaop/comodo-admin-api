@@ -53,6 +53,7 @@
       'sys_log'
     ];
     private $_allowRequestMethod = ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'];
+    private $_previewAllowRequestMethod = ['GET'];
     private $_statusCode = [
       200 => 'OK',
       204 => 'No Content',
@@ -92,6 +93,12 @@
 
     private function _setupRequestMethod(){
       $this -> _requestMethod = $_SERVER['REQUEST_METHOD'];
+      $path = $_SERVER['PATH_INFO'];
+
+      if(!in_array($this -> _requestMethod, $this -> _previewAllowRequestMethod) && $path != '/user/login' && $path != '/user/logout'){
+        throw new Exception("为保持预览版本的完整性，您所请求的方法暂时不被允许", ErrorCode::PREVIEW_NOT_ALLOWED_METHOD);
+      }
+
       if(!in_array($this -> _requestMethod, $this -> _allowRequestMethod)){
         throw new Exception("请求方法不被允许", 405);
       }
