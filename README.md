@@ -1,12 +1,16 @@
-![图片](https://github.com/xtthaop/image-lib/blob/master/comodo-admin/logo.png?raw=true)
+<p align="center">
+  <img src="https://github.com/xtthaop/image-lib/blob/master/comodo-admin/logo.png?raw=true" width="50px" />
+</p>
 
-本软件基于 [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)、参考 [go-admin](https://github.com/go-admin-team/go-admin) 开发
+<p align="center">
+  本软件基于 <a href="https://github.com/PanJiaChen/vue-element-admin">vue-element-admin</a>、参考 <a href="https://github.com/go-admin-team/go-admin">go-admin</a> 开发
+</p>
 
 ## 简介
 
 Comodo Admin 是一款极简的 RBAC（基于角色的访问控制） 后台管理系统，前端基于 Vue 3 开发，后端基于 PHP 8.1 开发。它提供了一种 RBAC 后台管理系统的具体实现思路和运行框架。如果你具备 JS、CSS、HTML、Vue 3 和 PHP 的基础知识，即使你从来没有接触过 RBAC 后台管理系统，你也能快速上手。
 
-前端 [comodo-admin-web](https://github.com/xtthaop/comodo-admin-web) 使用了 Vue 3 的选项式 API，将来可能会推出 Vue 3 组合式 API 加上 TypeScript 的版本，现阶段推荐安装 ESLint 和 Prettier，ESLint 可以使代码风格更加一致并且避免一些错误，Prettier 可以帮你格式化代码让团队无需争论代码格式问题，同样风格和格式的代码会让合作变得简单很多。
+前端 [comodo-admin-web](https://github.com/xtthaop/comodo-admin-web) 使用了 Vue 3 的选项式 API，将来可能会推出 Vue 3 组合式 API 加上 TypeScript 改进的版本。相比于其他类似项目，本项目在菜单管理上配置更灵活、使用体验更好。为了提升代码质量和团队协作效率，推荐安装 ESLint 和 Prettier，ESLint 可以使代码风格更加一致并且避免一些错误，Prettier 可以帮你格式化代码让团队无需争论代码格式问题。
 
 因为我本人主要精力还是在前端，后端能力有限，开发过程中是持着学习的心态，所以并没有使用流行的后端开发框架。如果有后端开发者对 [comodo-admin-api](https://github.com/xtthaop/comodo-admin-api) 有兴趣并且期望共同建设的话，请参考 comodo-admin-api 源码实现一个更稳定更适用于生产的版本，我会把你的项目地址列到这里。
 
@@ -18,7 +22,7 @@ Comodo Admin 是一款极简的 RBAC（基于角色的访问控制） 后台管�
 登录页面提供用户名密码及**滑块验证码登录**。
 
 ### 系统布局
-![图片](https://github.com/xtthaop/image-lib/blob/master/comodo-admin/layout.png?raw=true)
+<img src="https://github.com/xtthaop/image-lib/blob/master/comodo-admin/layout.png?raw=true" width="60%" />
 
 #### 系统标识：
 显示系统 Logo 及系统名称，系统名称可通过**配置文件**修改，修改后登录页面及浏览器显示标题同步生效。
@@ -146,17 +150,17 @@ crontab -e
 ```
 
 ##### 初始化账户信息
-用户名：admin
+用户名：admin   
 密码：123456
 
-用户名：user1
+用户名：user1    
 密码：123456
 
 ## 关于作者
 Comodo Admin 的作者是一名前端小学生，水平不高，文档或者代码中如有不当之处还请指正。
 
 ## 成为赞助者
-![图片](https://github.com/xtthaop/image-lib/blob/master/comodo-admin/sponsor.png?raw=true)
+<img src="https://github.com/xtthaop/image-lib/blob/master/comodo-admin/sponsor.png?raw=true" width="300px" />
 
 维护这个项目需要一定的服务器费用用作项目预览，还需要消耗我本人一定的精力，所以如果这个项目帮助到你的话，请多多予以支持！感谢！
 
