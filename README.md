@@ -147,7 +147,7 @@ crontab -e
 ```
 在文件中写入
 ```
-0 3 * * * bash comodo-admin-api/assets/bash/comodo-admin-clear-expired-token.sh/backup.sh > /dev/null 2>&1 &
+0 3 * * * bash comodo-admin-api/assets/bash/comodo-admin-clear-expired-token.sh > /dev/null 2>&1 &
 ```
 
 ##### 初始化账户信息
