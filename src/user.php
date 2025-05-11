@@ -72,14 +72,18 @@
     private function _handleUserLogin(){
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
-      
-      $xMax = $_SESSION['captcha_x'] + 6;
-      $xMin = $_SESSION['captcha_x'] - 6;
-      
-      if(!(isset($body['x']) && strlen($body['x']))){
+
+      if(!$_SESSION['captcha_x']){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
-  
+
+      $xMax = $_SESSION['captcha_x'] + 6;
+      $xMin = $_SESSION['captcha_x'] - 6;
+
+      if(empty($body['x'])){
+        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      }
+
       if($body['x'] > $xMax || $body['x'] < $xMin){
         throw new Exception('拼图验证失败', ErrorCode::CAPTCHA_VERIFY_FAILED);
       }
