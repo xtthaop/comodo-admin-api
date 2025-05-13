@@ -102,6 +102,14 @@ class JwtAuth {
     return md5($string . $key);
   }
 
+  public function hashPassword($password){
+    return password_hash($password, PASSWORD_DEFAULT);
+  }
+
+  public function verifyPassword($password, $storedHash){
+    return password_verify($password, $storedHash);
+  }
+
   public function addTokenToBlack($token) {
     $redis = new Redis();
     $redis -> connect('127.0.0.1', 6379);

@@ -67,7 +67,7 @@
 
       $this -> _checkForRequired($body);
 
-      $body['password'] = $this -> _jwt -> md5Password($body['password']);
+      $body['password'] = $this -> _jwt -> hashPassword($body['password']);
       $userId = $this -> _sysUserLib -> addUser($body);
       $this -> _handleSetUserRole($userId, $body['role_ids']);
       return [
@@ -98,7 +98,8 @@
         !(isset($body['username']) && strlen($body['username'])) ||
         !(isset($body['phone']) && strlen($body['phone'])) ||
         !(isset($body['nickname']) && strlen($body['nickname'])) ||
-        !(isset($body['status']) && strlen($body['status']))
+        !(isset($body['status']) && strlen($body['status'])) ||
+        empty($body['role_ids'])
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
@@ -108,7 +109,7 @@
       $username = !(isset($body['username']) && strlen($body['username'])) ? null : $body['username'];
       $existedUsernameCount = $this -> _sysUserLib -> getExistedCount('username', $username, $userId);
       if($existedUsernameCount > 0){
-        throw new Exception('登录名已被使用', ErrorCode::USER_NAME_EXISTED);
+        throw new Exception('用户名已被使用', ErrorCode::USER_NAME_EXISTED);
       }
     }
 
@@ -138,19 +139,16 @@
       }else{
         $userInfo = $this -> _sysUserLib -> getUserInfo($body['user_id']);
         if($userInfo['username'] === 'admin'){
-          $userInfo = $this -> _sysUserLib -> getUserInfo($body['user_id']);
           $roleList = $this -> _sysUserLib -> getUserRoleIds($body['user_id']);
           $userInfo['role_ids'] = array_reduce($roleList, function($result, $value){
             return array_merge($result, array_values($value));
           }, array());
-          if($userInfo['username'] === 'admin'){
-            if(
-              $body['username'] != $userInfo['username'] ||
-              $body['status'] != $userInfo['status'] ||
-              json_encode($body['role_ids']) != json_encode($userInfo['role_ids'])
-            ){
-              throw new Exception('修改失败（不允许被修改的用户）', ErrorCode::USER_CANT_UPDATE);
-            }
+          if(
+            $body['username'] != $userInfo['username'] ||
+            $body['status'] != $userInfo['status'] ||
+            json_encode($body['role_ids']) != json_encode($userInfo['role_ids'])
+          ){
+            throw new Exception('修改失败（不允许被修改的用户）', ErrorCode::USER_CANT_UPDATE);
           }
         }
       }
@@ -195,7 +193,7 @@
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 
-      $body['new_password'] = $this -> _jwt -> md5Password($body['new_password']);
+      $body['new_password'] = $this -> _jwt -> hashPassword($body['new_password']);
       $this -> _sysUserLib -> resetPassword($body);
       return [
         'code' => 0,
