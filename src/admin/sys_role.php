@@ -51,6 +51,10 @@
 
       $this -> _checkForRequired($body);
 
+      if (!(isset($body['status']) && strlen($body['status']))) {
+        $body['status'] = 1;
+      }
+
       $roleId = $this -> _sysRoleLib -> addRole($body);
       $this -> _handleSetRoleMenu($roleId, $body['menu_ids']);
       return [
@@ -74,8 +78,7 @@
       if(
         !(isset($body['role_name']) && strlen($body['role_name'])) ||
         !(isset($body['role_key']) && strlen($body['role_key'])) ||
-        !(isset($body['role_sort']) && strlen($body['role_sort'])) ||
-        !(isset($body['status']) && strlen($body['status']))
+        !(isset($body['role_sort']) && strlen($body['role_sort']))
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
@@ -99,7 +102,10 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      if(empty($body['role_id'])){
+      if(
+        empty($body['role_id']) ||
+        !(isset($body['status']) && strlen($body['status']))
+      ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 

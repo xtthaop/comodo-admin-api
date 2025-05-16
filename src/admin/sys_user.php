@@ -67,6 +67,10 @@
 
       $this -> _checkForRequired($body);
 
+      if (!(isset($body['status']) && strlen($body['status']))) {
+        $body['status'] = 1;
+      }
+
       $body['password'] = $this -> _jwt -> hashPassword($body['password']);
       $userId = $this -> _sysUserLib -> addUser($body);
       $this -> _handleSetUserRole($userId, $body['role_ids']);
@@ -98,7 +102,6 @@
         !(isset($body['username']) && strlen($body['username'])) ||
         !(isset($body['phone']) && strlen($body['phone'])) ||
         !(isset($body['nickname']) && strlen($body['nickname'])) ||
-        !(isset($body['status']) && strlen($body['status'])) ||
         empty($body['role_ids'])
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
@@ -117,7 +120,10 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      if(empty($body['user_id'])){
+      if(
+        empty($body['user_id']) ||
+        !(isset($body['status']) && strlen($body['status']))
+      ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
 

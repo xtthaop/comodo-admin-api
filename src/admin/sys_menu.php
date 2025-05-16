@@ -106,7 +106,14 @@
       if(
         !(isset($body['title']) && strlen($body['title'])) ||
         !(isset($body['menu_type']) && strlen($body['menu_type'])) ||
-        !(isset($body['visible']) && strlen($body['visible']))
+        !(isset($body['parent_id']) && strlen($body['parent_id'])) ||
+        !(isset($body['sort']) && strlen($body['sort']))
+      ){
+        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(
+        $body['menu_type'] === 'P' && !(isset($body['is_link']) && strlen($body['is_link']))
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
@@ -122,6 +129,13 @@
       if(
         ($body['menu_type'] === 'P' && $body['cache'] && !$body['is_link']) &&
         !(isset($body['route_name']) && strlen($body['route_name']))
+      ){
+        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(
+        ($body['menu_type'] === 'P' && $body['is_link']) &&
+        !(isset($body['path']) && strlen($body['path']))
       ){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
       }
@@ -161,21 +175,24 @@
 
     private function _convertBodyContent($body){
       ['parent_id' => $parentId, 'menu_id' => $menuId, 'title' => $title, 'sort' => $sort, 'menu_type' => $menuType] = $body;
-      $sort = $sort ? $sort : 0;
-      $parentId = $parentId ? $parentId : 0;
       $baseObj = ['parent_id' => $parentId, 'menu_id' => $menuId, 'title' => $title, 'sort' => $sort, 'menu_type' => $menuType];
       switch($menuType){
         case 'F': {
-          ['icon' => $icon, 'visible' => $visible] = $body;
-          return array_merge($baseObj, ['icon' => $icon, 'visible' => $visible]);
+          ['icon' => $icon, 'visible' => $visible, 'permission' => $permission] = $body;
+          $visible = $visible ? $visible : 1;
+          return array_merge($baseObj, ['icon' => $icon, 'visible' => $visible, 'permission' => $permission]);
         }
         case 'P': {
-          ['icon' => $icon, 'visible' => $visible, 'is_link' => $isLink] = $body;
           if($isLink){
+            ['icon' => $icon, 'visible' => $visible, 'is_link' => $isLink] = $body;
             ['path' => $path, 'permission' => $permission] = $body;
+            $visible = $visible ? $visible : 1;
             return array_merge($baseObj, ['icon' => $icon, 'visible' => $visible, 'is_link' => $isLink, 'path' => $path, 'permission' => $permission]);
           }else{
             $parent = $this -> _sysMenuLib -> getMenuInfo($parentId);
+            $body['visible'] = $body['visible'] ? $body['visible'] : 1;
+            $body['cache'] = $body['cache'] ? $body['cache'] : 0;
+            $body['layout'] = $body['layout'] ? $body['layout'] : 1;
             if($parent['menu_type'] !== 'P'){
               $body['active_menu'] = null;
             }
