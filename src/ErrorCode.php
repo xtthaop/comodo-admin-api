@@ -25,4 +25,5 @@
     const USER_HAS_UNENABLED = 4024; // 账户被禁用
     const DICT_DATA_LABEL_EXISTED = 4025; // 字典数据标签已存在
     const DICT_DATA_VALUE_EXISTED = 4026; // 字典数据值已存在
+    const START_WITH_SLASH= 4027; // 需要以斜杠开头
   }

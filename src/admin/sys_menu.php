@@ -127,6 +127,22 @@
       }
 
       if(
+        ($body['menu_type'] === 'P' && !$body['is_link']) &&
+        (isset($body['component']) && strlen($body['component'])) &&
+        !str_starts_with($body['component'], '/')
+      ){
+        throw new Exception("组件路径必须以 '/' 开头", ErrorCode::START_WITH_SLASH);
+      }
+
+      if(
+        ($body['menu_type'] === 'P' && !$body['is_link']) &&
+        (isset($body['path']) && strlen($body['path'])) &&
+        !str_starts_with($body['path'], '/')
+      ){
+        throw new Exception("路由地址必须以 '/' 开头", ErrorCode::START_WITH_SLASH);
+      }
+
+      if(
         ($body['menu_type'] === 'P' && $body['cache'] && !$body['is_link']) &&
         !(isset($body['route_name']) && strlen($body['route_name']))
       ){
@@ -205,7 +221,7 @@
         }
         case 'B': {
           ['permission' => $permission, 'apis' => $apis] = $body;
-          return array_merge($baseObj, ['visible' => 2, 'permission' => $permission, 'apis' => $apis]);
+          return array_merge($baseObj, ['permission' => $permission, 'apis' => $apis]);
         }
         default: {
           throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
