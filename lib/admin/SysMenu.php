@@ -30,7 +30,7 @@
     }
 
     public function getSysMenuListByPid($pid){
-      $sql = 'SELECT * FROM `sys_menu` WHERE `parent_id`=:parent_id ORDER BY `sort`';
+      $sql = 'SELECT * FROM `sys_menu` WHERE `parent_id`=:parent_id ORDER BY `sort`, `created_at` DESC';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':parent_id', $pid);
       $stml -> execute();
