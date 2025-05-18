@@ -195,26 +195,22 @@
       switch($menuType){
         case 'F': {
           ['icon' => $icon, 'visible' => $visible, 'permission' => $permission] = $body;
-          $visible = $visible ? $visible : 1;
+          $visible = (isset($visible) && strlen($visible)) ? $visible : 1;
           return array_merge($baseObj, ['icon' => $icon, 'visible' => $visible, 'permission' => $permission]);
         }
         case 'P': {
           if($isLink){
             ['icon' => $icon, 'visible' => $visible, 'is_link' => $isLink] = $body;
             ['path' => $path, 'permission' => $permission] = $body;
-            $visible = $visible ? $visible : 1;
+            $visible = (isset($visible) && strlen($visible)) ? $visible : 1;
             return array_merge($baseObj, ['icon' => $icon, 'visible' => $visible, 'is_link' => $isLink, 'path' => $path, 'permission' => $permission]);
           }else{
             $parent = $this -> _sysMenuLib -> getMenuInfo($parentId);
-            $body['visible'] = $body['visible'] ? $body['visible'] : 1;
-            $body['cache'] = $body['cache'] ? $body['cache'] : 0;
-            $body['layout'] = $body['layout'] ? $body['layout'] : 1;
+            $body['visible'] = (isset($body['visible']) && strlen($body['visible'])) ? $body['visible'] : 1;
+            $body['cache'] = (isset($body['cache']) && strlen($body['cache'])) ? $body['cache'] : 0;
+            $body['layout'] = (isset($body['layout']) && strlen($body['layout'])) ? $body['layout'] : 1;
             if($parent['menu_type'] !== 'P'){
               $body['active_menu'] = null;
-            }
-            if($parent['menu_type'] === 'P' && $body['menu_type'] === 'P'){
-              $body['visible'] = 0;
-              $body['is_link'] = 0;
             }
             return $body;
           }
@@ -241,23 +237,6 @@
       $data = $this -> _convertBodyContent($body);
 
       $menuInfo = $this -> _sysMenuLib -> getMenuInfo($data['menu_id']);
-      $parent = $this -> _sysMenuLib -> getMenuInfo($data['parent_id']);
-      if($menuInfo['permission'] === 'admin:sysmenu'){
-        if(
-          $parent['menu_type'] === 'P' ||
-          $data['permission'] != $menuInfo['permission'] ||
-          $data['path'] !== $menuInfo['path'] ||
-          $data['component'] != $menuInfo['component'] ||
-          $data['route_name'] != $menuInfo['route_name'] ||
-          $data['visible'] != $menuInfo['visible'] ||
-          $data['is_link'] != $menuInfo['is_link'] ||
-          $data['menu_type'] != $menuInfo['menu_type'] ||
-          $data['layout'] != $menuInfo['layout'] ||
-          $data['cache'] != $menuInfo['cache']
-        ){
-          throw new Exception('修改失败（包含不允许被修改的菜单）', ErrorCode::MENU_CANT_UPDATE);
-        }
-      }
 
       if($data['parent_id'] == $menuInfo['menu_id']){
         throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
