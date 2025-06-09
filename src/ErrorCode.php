@@ -13,7 +13,6 @@
     const ROLE_KEY_EXISTED = 4012; // 角色标识已存在
     const ROLE_CANT_UPDATE = 4013; // 角色不允许被修改
     const ROLE_CANT_DELETE = 4014; // 角色不允许被删除
-    const USER_NAME_EXISTED = 4015; // 用户名称已存在
     const USER_CANT_DELETE = 4016; // 用户不能被删除
     const USER_CANT_UPDATE = 4017; // 用户不可以被修改
     const CAPTCHA_VERIFY_FAILED = 4018; // 拼图验证失败

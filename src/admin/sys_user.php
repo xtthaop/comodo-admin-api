@@ -61,13 +61,17 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      if(!(isset($body['password']) && strlen($body['password']))){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(empty($body['password'])){
+        throw new Exception('密码不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(strlen($body['password']) !== 32){
+        throw new Exception('密码不完整', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _checkForRequired($body);
 
-      if (!(isset($body['status']) && strlen($body['status']))) {
+      if(!($body['status'] === 0 || $body['status'] === 1)){
         $body['status'] = 1;
       }
 
@@ -98,21 +102,41 @@
     }
 
     private function _checkForRequired($body){
-      if(
-        !(isset($body['username']) && strlen($body['username'])) ||
-        !(isset($body['phone']) && strlen($body['phone'])) ||
-        !(isset($body['nickname']) && strlen($body['nickname'])) ||
-        empty($body['role_ids'])
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(!(isset($body['username']) && strlen($body['username']))){
+        throw new Exception('用户名不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      $userId = empty($body['user_id']) ? '' : $body['user_id'];
+      if(empty($body['phone'])){
+        throw new Exception('手机号不能为空', ErrorCode::INVALID_PARAMS);
+      }
 
-      $username = !(isset($body['username']) && strlen($body['username'])) ? null : $body['username'];
-      $existedUsernameCount = $this -> _sysUserLib -> getExistedCount('username', $username, $userId);
+      if(!preg_match('/^1[3-9]\d{9}$/', $body['phone'])){
+        throw new Exception('手机号格式不正确', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!(isset($body['nickname']) && strlen($body['nickname']))){
+        throw new Exception('昵称不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!is_array($body['role_ids'])){
+        throw new Exception('角色参数必须为数组', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(empty($body['role_ids'])){
+        throw new Exception('角色不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!empty($body['email'])){
+        if(!preg_match('/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/', $body['email'])){
+          throw new Exception('邮箱格式不正确', ErrorCode::INVALID_PARAMS);
+        }
+      }
+
+      $userId = empty($body['user_id']) ? 0 : $body['user_id'];
+
+      $existedUsernameCount = $this -> _sysUserLib -> getExistedCount('username', $body['username'], $userId);
       if($existedUsernameCount > 0){
-        throw new Exception('用户名已被使用', ErrorCode::USER_NAME_EXISTED);
+        throw new Exception('用户名已被使用', ErrorCode::INVALID_PARAMS);
       }
     }
 
