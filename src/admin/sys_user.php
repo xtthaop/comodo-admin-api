@@ -144,11 +144,12 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      if(
-        empty($body['user_id']) ||
-        !(isset($body['status']) && strlen($body['status']))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(empty($body['user_id'])){
+        throw new Exception('用户ID不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!($body['status'] === 0 || $body['status'] === 1)){
+        throw new Exception('用户状态不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _checkForRequired($body);
@@ -163,23 +164,23 @@
     }
 
     private function _handlePreventUpdate($body){
-      $isAdmin = $this -> _sysUserLib -> checkUserIsAdminRole($body['user_id']);
-      if(!$isAdmin){
-        return;
-      }else{
-        $userInfo = $this -> _sysUserLib -> getUserInfo($body['user_id']);
-        if($userInfo['username'] === 'admin'){
-          $roleList = $this -> _sysUserLib -> getUserRoleIds($body['user_id']);
-          $userInfo['role_ids'] = array_reduce($roleList, function($result, $value){
-            return array_merge($result, array_values($value));
-          }, array());
-          if(
-            $body['username'] != $userInfo['username'] ||
-            $body['status'] != $userInfo['status'] ||
-            json_encode($body['role_ids']) != json_encode($userInfo['role_ids'])
-          ){
-            throw new Exception('修改失败（不允许被修改的用户）', ErrorCode::USER_CANT_UPDATE);
-          }
+      $userInfo = $this -> _sysUserLib -> getUserInfo($body['user_id']);
+      if($userInfo['username'] === 'admin'){
+        $roleList = $this -> _sysUserLib -> getUserRoleIds($body['user_id']);
+        $userInfo['role_ids'] = array_reduce($roleList, function($result, $value){
+          return array_merge($result, array_values($value));
+        }, array());
+        if($body['username'] != $userInfo['username']){
+          throw new Exception('超级管理员用户名不允许被修改', ErrorCode::UPDATE_FAILED);
+        }
+        if($body['nickname'] != $userInfo['nickname']){
+          throw new Exception('超级管理员昵称不允许被修改', ErrorCode::UPDATE_FAILED);
+        }
+        if($body['status'] != $userInfo['status']){
+          throw new Exception('超级管理员状态不允许被修改', ErrorCode::UPDATE_FAILED);
+        }
+        if(json_encode($body['role_ids']) != json_encode($userInfo['role_ids'])){
+          throw new Exception('超级管理员角色不允许被修改', ErrorCode::UPDATE_FAILED);
         }
       }
     }

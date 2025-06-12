@@ -48,8 +48,7 @@
     }
 
     public function getUserRoleIds($userId){
-      $sql = 'SELECT `role_id` FROM `sys_role` WHERE `role_id` IN (SELECT `role_id` FROM `sys_user_role_rule` 
-              WHERE `user_id`=:user_id)';
+      $sql = 'SELECT `role_id` FROM `sys_user_role_rule` WHERE `user_id`=:user_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':user_id', $userId);
       $stml -> execute();
