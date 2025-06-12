@@ -138,6 +138,11 @@
       if($existedUsernameCount > 0){
         throw new Exception('用户名已被使用', ErrorCode::INVALID_PARAMS);
       }
+
+      $existedUsernameCount = $this -> _sysUserLib -> getExistedCount('nickname', $body['nickname'], $userId);
+      if($existedUsernameCount > 0){
+        throw new Exception('昵称已被使用', ErrorCode::INVALID_PARAMS);
+      }
     }
 
     private function _handleUpdateSysUser(){
