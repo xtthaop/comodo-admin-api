@@ -190,7 +190,7 @@
       $body = json_decode($raw, true);
 
       if(empty($body['user_id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('用户ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _handlePreventDelete($body['user_id']);
@@ -202,14 +202,9 @@
     }
 
     private function _handlePreventDelete($userId){
-      $isAdmin = $this -> _sysUserLib -> checkUserIsAdminRole($userId);
-      if(!$isAdmin){
-        return;
-      }else{
-        $userInfo = $this -> _sysUserLib -> getUserInfo($userId);
-        if($userInfo['username'] === 'admin'){
-          throw new Exception('用户不能被删除', ErrorCode::USER_CANT_DELETE);
-        }
+      $userInfo = $this -> _sysUserLib -> getUserInfo($userId);
+      if($userInfo['username'] === 'admin'){
+        throw new Exception('超级管理员不能被删除', ErrorCode::DELETE_FAILED);
       }
     }
 
