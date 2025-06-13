@@ -217,11 +217,21 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      if(
-        !(isset($body['new_password']) && strlen($body['new_password'])) || 
-        empty($body['user_id']))
-      {
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(empty($body['user_id'])){
+        throw new Exception('用户ID不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(empty($body['new_password'])){
+        throw new Exception('新密码不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(strlen($body['new_password']) !== 32){
+        throw new Exception('新密码不完整', ErrorCode::INVALID_PARAMS);
+      }
+
+      $userInfo = $this -> _sysUserLib -> getUserInfo($body['user_id']);
+      if($userInfo['username'] === 'admin'){
+        throw new Exception('超级管理员密码不允许被重置', ErrorCode::UPDATE_FAILED);
       }
 
       $body['new_password'] = $this -> _jwt -> hashPassword($body['new_password']);
