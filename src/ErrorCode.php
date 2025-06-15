@@ -11,8 +11,6 @@
     const PERMISSION_EXISTED = 4008; // 权限标识已存在
     const MENU_CANT_DELETE = 4009; // 菜单不允许被删除
     const MENU_CANT_UPDATE = 4010; // 菜单不允许被编辑
-    const ROLE_NAME_EXISTED = 4011; // 角色名称已存在
-    const ROLE_KEY_EXISTED = 4012; // 角色标识已存在
     const ROLE_CANT_UPDATE = 4013; // 角色不允许被修改
     const ROLE_CANT_DELETE = 4014; // 角色不允许被删除
     const CAPTCHA_VERIFY_FAILED = 4018; // 拼图验证失败

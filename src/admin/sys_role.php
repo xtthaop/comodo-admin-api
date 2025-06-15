@@ -51,7 +51,7 @@
 
       $this -> _checkForRequired($body);
 
-      if (!(isset($body['status']) && strlen($body['status']))) {
+      if (!($body['status'] === 0 || $body['status'] === 1)) {
         $body['status'] = 1;
       }
 
@@ -75,26 +75,32 @@
     }
 
     private function _checkForRequired($body){
-      if(
-        !(isset($body['role_name']) && strlen($body['role_name'])) ||
-        !(isset($body['role_key']) && strlen($body['role_key'])) ||
-        !(isset($body['role_sort']) && strlen($body['role_sort']))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(!(isset($body['role_name']) && strlen($body['role_name']))){
+        throw new Exception('角色名称不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      $roleId = empty($body['role_id']) ? '' : $body['role_id'];
+      if(!(isset($body['role_key']) && strlen($body['role_key']))){
+        throw new Exception('角色权限标识不能为空', ErrorCode::INVALID_PARAMS);
+      }
 
-      $roleName = !(isset($body['role_name']) && strlen($body['role_name'])) ? null : $body['role_name'];
-      $existedRoleNameCount = $this -> _sysRoleLib -> getExistedCount('role_name', $roleName, $roleId);
+      if(!isset($body['role_sort'])){
+        throw new Exception('角色排序不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(isset($body['menu_ids']) && !is_array($body['menu_ids'])){
+        throw new Exception('菜单参数必须为数组', ErrorCode::INVALID_PARAMS);
+      }
+
+      $roleId = empty($body['role_id']) ? 0 : $body['role_id'];
+
+      $existedRoleNameCount = $this -> _sysRoleLib -> getExistedCount('role_name', $body['role_name'], $roleId);
       if($existedRoleNameCount > 0){
-        throw new Exception('角色名称已被使用', ErrorCode::ROLE_NAME_EXISTED);
+        throw new Exception('角色名称已被使用', ErrorCode::INVALID_PARAMS);
       }
 
-      $routeKey = !(isset($body['role_key']) && strlen($body['role_key'])) ? null : $body['role_key'];
-      $existedRoleKeyCount = $this -> _sysRoleLib -> getExistedCount('role_key', $routeKey, $roleId);
+      $existedRoleKeyCount = $this -> _sysRoleLib -> getExistedCount('role_key', $body['role_key'], $roleId);
       if($existedRoleKeyCount > 0){
-        throw new Exception('角色标识已被使用', ErrorCode::ROLE_KEY_EXISTED);
+        throw new Exception('角色标识已被使用', ErrorCode::INVALID_PARAMS);
       }
     }
 
