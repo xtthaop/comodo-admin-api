@@ -87,6 +87,10 @@
         throw new Exception('角色排序不能为空', ErrorCode::INVALID_PARAMS);
       }
 
+      if (!isset($body['check_strictly'])) {
+        throw new Exception('菜单父子是否关联选择不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
       if(isset($body['menu_ids']) && !is_array($body['menu_ids'])){
         throw new Exception('菜单参数必须为数组', ErrorCode::INVALID_PARAMS);
       }
@@ -108,23 +112,29 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      if(
-        empty($body['role_id']) ||
-        !(isset($body['status']) && strlen($body['status']))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(empty($body['role_id'])){
+        throw new Exception('角色ID不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if (!isset($body['status'])) {
+        throw new Exception('角色状态不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _checkForRequired($body);
 
       $roleInfo = $this -> _sysRoleLib -> getRoleInfo($body['role_id']);
       if($roleInfo['role_key'] === 'admin'){
-        if(
-          $body['role_key'] != $roleInfo['role_key'] ||
-          $body['status'] != $roleInfo['status'] ||
-          !empty($body['menu_ids'])
-        ){
-          throw new Exception('修改失败（不允许被修改的角色）', ErrorCode::ROLE_CANT_UPDATE);
+        if($body['role_name'] != $roleInfo['role_name']){
+          throw new Exception('超级管理员角色名不允许被修改', ErrorCode::UPDATE_FAILED);
+        }
+        if($body['role_key'] != $roleInfo['role_key']){
+          throw new Exception('超级管理员角色标识不允许被修改', ErrorCode::UPDATE_FAILED);
+        }
+        if($body['status'] != $roleInfo['status']){
+          throw new Exception('超级管理员角色状态不允许被修改', ErrorCode::UPDATE_FAILED);
+        }
+        if(!empty($body['menu_ids'])){
+          throw new Exception('超级管理员角色菜单不允许被修改', ErrorCode::UPDATE_FAILED);
         }
       }
 

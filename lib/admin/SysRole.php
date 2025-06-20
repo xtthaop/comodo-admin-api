@@ -61,13 +61,14 @@
       global $gUserId;
       $currentTime = date('Y-m-d H:i:s');
 
-      $sql = 'INSERT INTO `sys_role` (`role_name`, `role_key`, `role_sort`, `status`, `remark`, `create_by`, 
-             `created_at`) VALUES (:role_name, :role_key, :role_sort, :status, :remark, :create_by, :created_at)';
+      $sql = 'INSERT INTO `sys_role` (`role_name`, `role_key`, `role_sort`, `status`, `check_strictly`, `remark`, `create_by`, 
+             `created_at`) VALUES (:role_name, :role_key, :role_sort, :status, :check_strictly, :remark, :create_by, :created_at)';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':role_name', $body['role_name']);
       $stml -> bindParam(':role_key', $body['role_key']);
       $stml -> bindParam(':role_sort', $body['role_sort']);
       $stml -> bindParam(':status', $body['status']);
+      $stml -> bindParam(':check_strictly', $body['check_strictly']);
       $stml -> bindParam(':remark', $body['remark']);
       $stml -> bindParam(':create_by', $gUserId);
       $stml -> bindParam(':created_at', $currentTime);
@@ -96,7 +97,7 @@
       $currentTime = date('Y-m-d H:i:s');
 
       $sql = 'UPDATE `sys_role` SET `role_name`=:role_name, `role_key`=:role_key, `role_sort`=:role_sort, 
-             `status`=:status, `remark`=:remark, `update_by`=:update_by, `updated_at`=:updated_at WHERE 
+             `status`=:status, `check_strictly`=:check_strictly, `remark`=:remark, `update_by`=:update_by, `updated_at`=:updated_at WHERE 
              `role_id`=:role_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':role_id', $body['role_id']);
@@ -104,6 +105,7 @@
       $stml -> bindParam(':role_key', $body['role_key']);
       $stml -> bindParam(':role_sort', $body['role_sort']);
       $stml -> bindParam(':status', $body['status']);
+      $stml -> bindParam(':check_strictly', $body['check_strictly']);
       $stml -> bindParam(':remark', $body['remark']);
       $stml -> bindParam(':update_by', $gUserId);
       $stml -> bindParam(':updated_at', $currentTime);

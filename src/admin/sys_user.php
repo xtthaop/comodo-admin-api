@@ -92,7 +92,7 @@
         foreach($roleIds as $value){
           $isUnactived = $this -> _sysRoleLib -> getRoleInfo($value)['status'];
           if($isUnactived === 0){
-            throw new Exception('所选角色中存在被禁用的角色', ErrorCode::USER_ROLE_UNACTIVED);
+            throw new Exception('所选角色中存在被禁用的角色', ErrorCode::INVALID_PARAMS);
           }
         }
         foreach($roleIds as $value){
@@ -153,7 +153,7 @@
         throw new Exception('用户ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      if(!($body['status'] === 0 || $body['status'] === 1)){
+      if(!isset($body['status'])){
         throw new Exception('用户状态不能为空', ErrorCode::INVALID_PARAMS);
       }
 
