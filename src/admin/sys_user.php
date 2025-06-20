@@ -209,7 +209,7 @@
     private function _handlePreventDelete($userId){
       $userInfo = $this -> _sysUserLib -> getUserInfo($userId);
       if($userInfo['username'] === 'admin'){
-        throw new Exception('超级管理员不能被删除', ErrorCode::DELETE_FAILED);
+        throw new Exception('超级管理员用户不能被删除', ErrorCode::DELETE_FAILED);
       }
     }
 

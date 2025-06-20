@@ -130,6 +130,11 @@
     }
 
     public function deleteUser($id){
+      $sql = 'DELETE FROM `sys_user_role_rule` WHERE `user_id` = :user_id';
+      $stml = $this -> _db -> prepare($sql);
+      $stml -> bindParam(':user_id', $id);
+      $stml -> execute();
+
       $sql = 'DELETE FROM `sys_user` WHERE `user_id`=:user_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':user_id', $id);

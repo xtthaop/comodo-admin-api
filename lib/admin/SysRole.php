@@ -123,6 +123,11 @@
     }
 
     public function deleteRole($id){
+      $sql = 'DELETE FROM `sys_role_menu_rule` WHERE `role_id` = :role_id';
+      $stml = $this -> _db -> prepare($sql);
+      $stml -> bindParam(':role_id', $id);
+      $stml -> execute();
+
       $sql = 'DELETE FROM `sys_role` WHERE `role_id`=:role_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':role_id', $id);

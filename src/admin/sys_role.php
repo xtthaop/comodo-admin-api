@@ -151,12 +151,12 @@
       $body = json_decode($raw, true);
 
       if(empty($body['role_id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('角色ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $roleInfo = $this -> _sysRoleLib -> getRoleInfo($body['role_id']);
       if($roleInfo['role_key'] === 'admin'){
-        throw new Exception('删除失败（包含不允许被删除的角色）', ErrorCode::ROLE_CANT_DELETE);
+        throw new Exception('超级管理员角色不能被删除', ErrorCode::DELETE_FAILED);
       }
 
       $this -> _sysRoleLib -> deleteRole($body['role_id']);
