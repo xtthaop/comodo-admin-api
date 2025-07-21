@@ -80,6 +80,22 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
+      if(!($body['visible'] === 0 || $body['visible'] === 1)){
+        $body['visible'] = 1;
+      }
+
+      if(!($body['is_link'] === 0 || $body['is_link'] === 1)){
+        $body['is_link'] = 0;
+      }
+
+      if(!($body['cache'] === 0 || $body['cache'] === 1)){
+        $body['cache'] = 0;
+      }
+
+      if(!($body['layout'] === 0 || $body['layout'] === 1)){
+        $body['layout'] = 1;
+      }
+
       $this -> _checkForRequired($body);
       $data = $this -> _convertBodyContent($body);
 
@@ -103,88 +119,93 @@
     }
 
     private function _checkForRequired($body){
-      if(
-        !(isset($body['title']) && strlen($body['title'])) ||
-        !(isset($body['menu_type']) && strlen($body['menu_type'])) ||
-        !(isset($body['parent_id']) && strlen($body['parent_id'])) ||
-        !(isset($body['sort']) && strlen($body['sort']))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      $menuId = $body['menu_id'];
+
+      if(!(isset($body['parent_id']))){
+        throw new Exception('父级菜单不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      if(
-        $body['menu_type'] === 'P' && !(isset($body['is_link']) && strlen($body['is_link']))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(!(isset($body['title']) && strlen($body['title']))){
+        throw new Exception('菜单名称不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      if(
-        ($body['menu_type'] === 'P' && !$body['is_link']) &&
-        (!(isset($body['component']) && strlen($body['component'])) ||
-        !(isset($body['path']) && strlen($body['path'])))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(!isset($body['sort'])){
+        throw new Exception('排序不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      if(
-        ($body['menu_type'] === 'P' && !$body['is_link']) &&
-        (isset($body['component']) && strlen($body['component'])) &&
-        !str_starts_with($body['component'], '/')
-      ){
-        throw new Exception("组件路径必须以 '/' 开头", ErrorCode::START_WITH_SLASH);
+      if(!(isset($body['menu_type']) && strlen($body['menu_type']))){
+        throw new Exception('菜单类型不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      if(
-        ($body['menu_type'] === 'P' && !$body['is_link']) &&
-        (isset($body['path']) && strlen($body['path'])) &&
-        !str_starts_with($body['path'], '/')
-      ){
-        throw new Exception("路由地址必须以 '/' 开头", ErrorCode::START_WITH_SLASH);
-      }
-
-      if(
-        ($body['menu_type'] === 'P' && $body['cache'] && !$body['is_link']) &&
-        !(isset($body['route_name']) && strlen($body['route_name']))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
-      }
-
-      if(
-        ($body['menu_type'] === 'P' && $body['is_link']) &&
-        !(isset($body['path']) && strlen($body['path']))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(!in_array($body['menu_type'], ['F', 'P', 'B'])){
+        throw new Exception('菜单类型错误', ErrorCode::INVALID_PARAMS);
       }
 
       $parent = $this -> _sysMenuLib -> getMenuInfo($body['parent_id']);
       $parentMenuType = $parent['menu_type'];
       $menuType = $body['menu_type'];
+
       if(
         ($parentMenuType === 'P' && $menuType === 'F') ||
         ($parentMenuType === 'B')
       ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('父级菜单类型有误', ErrorCode::INVALID_PARAMS);
       }
 
-      $menuId = $body['menu_id'];
-      if((isset($body['route_name']) && strlen($body['route_name']))){
-        $existedRouteNameCount = $this -> _sysMenuLib -> getExistedCount('route_name', $body['route_name'], $menuId);
-        if($existedRouteNameCount > 0){
-          throw new Exception('路由名称已被使用', ErrorCode::ROUTE_NAME_EXISTED);
+      if($parentMenuType === 'P' && $menuType === 'P'){
+        if(isset($body['is_link']) && $body['is_link']){
+          throw new Exception('父级菜单为页面时不支持创建外部链接页面菜单', ErrorCode::INVALID_PARAMS);
+        }
+        if(isset($body['visible']) && $body['visible']){
+          throw new Exception('父级菜单为页面时不支持创建可显示页面菜单', ErrorCode::INVALID_PARAMS);
         }
       }
 
-      if((isset($body['path']) && strlen($body['path']))){
-        $existedRoutePathCount = $this -> _sysMenuLib -> getExistedCount('path', $body['path'], $menuId);
-        if($existedRoutePathCount > 0){
-          throw new Exception('路由地址已被使用', ErrorCode::ROUTE_PATH_EXISTED);
+      if(($parentMenuType === 'F' && $menuType === 'P') || ($parentMenuType === 'P' && $menuType === 'P')){
+        if(isset($body['is_link']) && !$body['is_link']){
+          if(!(isset($body['component']) && strlen($body['component']))){
+            throw new Exception('组件路径不能为空', ErrorCode::INVALID_PARAMS);
+          }
+          if(!(isset($body['path']) && strlen($body['path']))){
+            throw new Exception('路由地址不能为空', ErrorCode::INVALID_PARAMS);
+          }
+          if(!str_starts_with($body['component'], '/')){
+            throw new Exception('组件路径必须以 "/" 开头', ErrorCode::INVALID_PARAMS);
+          }
+          if(!str_starts_with($body['path'], '/')){
+            throw new Exception('路由地址必须以 "/" 开头', ErrorCode::INVALID_PARAMS);
+          }
+          if(isset($body['cache']) && $body['cache'] && !(isset($body['route_name']) && strlen($body['route_name']))){
+            throw new Exception('路由名称不能为空', ErrorCode::INVALID_PARAMS);
+          }
+          
+          $existedRoutePathCount = $this -> _sysMenuLib -> getExistedCount('path', $body['path'], $menuId);
+          if($existedRoutePathCount > 0){
+            throw new Exception('路由地址已被使用', ErrorCode::INVALID_PARAMS);
+          }
+
+          if((isset($body['route_name']) && strlen($body['route_name']))){
+            $existedRouteNameCount = $this -> _sysMenuLib -> getExistedCount('route_name', $body['route_name'], $menuId);
+            if($existedRouteNameCount > 0){
+              throw new Exception('路由名称已被使用', ErrorCode::INVALID_PARAMS);
+            }
+          }
+        }
+
+        if(isset($body['is_link']) && $body['is_link']){
+          if(!(isset($body['path']) && strlen($body['path']))){
+            throw new Exception('外部链接地址不能为空', ErrorCode::INVALID_PARAMS);
+          }
+          if(!preg_match('/^(https?:|mailto:|tel:)/', $body['path'])){
+            throw new Exception('外部链接地址格式错误', ErrorCode::INVALID_PARAMS);
+          }
         }
       }
 
       if((isset($body['permission']) && strlen($body['permission']))){
         $existedPermissionCount = $this -> _sysMenuLib -> getExistedCount('permission', $body['permission'], $menuId);
         if($existedPermissionCount > 0){
-          throw new Exception('权限标识已被使用', ErrorCode::PERMISSION_EXISTED);
+          throw new Exception('权限标识已被使用', ErrorCode::INVALID_PARAMS);
         }
       }
     }
@@ -195,20 +216,15 @@
       switch($menuType){
         case 'F': {
           ['icon' => $icon, 'visible' => $visible, 'permission' => $permission] = $body;
-          $visible = (isset($visible) && strlen($visible)) ? $visible : 1;
           return array_merge($baseObj, ['icon' => $icon, 'visible' => $visible, 'permission' => $permission]);
         }
         case 'P': {
           if($isLink){
             ['icon' => $icon, 'visible' => $visible, 'is_link' => $isLink] = $body;
             ['path' => $path, 'permission' => $permission] = $body;
-            $visible = (isset($visible) && strlen($visible)) ? $visible : 1;
             return array_merge($baseObj, ['icon' => $icon, 'visible' => $visible, 'is_link' => $isLink, 'path' => $path, 'permission' => $permission]);
           }else{
             $parent = $this -> _sysMenuLib -> getMenuInfo($parentId);
-            $body['visible'] = (isset($body['visible']) && strlen($body['visible'])) ? $body['visible'] : 1;
-            $body['cache'] = (isset($body['cache']) && strlen($body['cache'])) ? $body['cache'] : 0;
-            $body['layout'] = (isset($body['layout']) && strlen($body['layout'])) ? $body['layout'] : 1;
             if($parent['menu_type'] !== 'P'){
               $body['active_menu'] = null;
             }
@@ -220,7 +236,7 @@
           return array_merge($baseObj, ['permission' => $permission, 'apis' => $apis]);
         }
         default: {
-          throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+          throw new Exception('菜单类型不存在', ErrorCode::INVALID_PARAMS);
         }
       }
     }

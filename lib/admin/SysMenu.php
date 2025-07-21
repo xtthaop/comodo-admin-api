@@ -150,7 +150,7 @@
     }
 
     public function getAllSysMenuPath(){
-      $sql = 'SELECT DISTINCT `path` FROM `sys_menu` WHERE `path` IS NOT NULL';
+      $sql = 'SELECT DISTINCT `path` FROM `sys_menu` WHERE `path` IS NOT NULL AND `is_link`=0';
       $stml = $this -> _db -> prepare($sql);
       $stml -> execute();
       $result = $stml -> fetchAll(PDO::FETCH_NUM);
