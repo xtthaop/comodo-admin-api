@@ -145,11 +145,16 @@
       $parentMenuType = $parent['menu_type'];
       $menuType = $body['menu_type'];
 
-      if(
-        ($parentMenuType === 'P' && $menuType === 'F') ||
-        ($parentMenuType === 'B')
-      ){
-        throw new Exception('父级菜单类型有误', ErrorCode::INVALID_PARAMS);
+      if($parentMenuType === 'B'){
+        throw new Exception('父级菜单不能是按钮', ErrorCode::INVALID_PARAMS);
+      }
+
+      if($parentMenuType === 'P' && $parent['is_link'] === 1){
+        throw new Exception('父级菜单不能是外部链接页面', ErrorCode::INVALID_PARAMS);
+      }
+
+      if($parentMenuType === 'P' && $menuType === 'F'){
+        throw new Exception('页面夹的父级菜单不能是页面', ErrorCode::INVALID_PARAMS);
       }
 
       if($parentMenuType === 'P' && $menuType === 'P'){
@@ -245,18 +250,77 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      if(empty($body['menu_id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(!isset($body['menu_id'])){
+        throw new Exception('菜单ID不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!(isset($body['parent_id']))){
+        throw new Exception('父级菜单不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      $menuInfo = $this -> _sysMenuLib -> getMenuInfo($body['menu_id']);
+      $parentMenuInfo = $this -> _sysMenuLib -> getMenuInfo($body['parent_id']);
+
+      if(empty($menuInfo)){
+        throw new Exception('菜单ID不存在', ErrorCode::INVALID_PARAMS);
+      }
+
+      if($body['parent_id'] == $menuInfo['menu_id']){
+        throw new Exception('父菜单不能选自身', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!(isset($body['menu_type']) && strlen($body['menu_type']))){
+        throw new Exception('菜单类型不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!in_array($body['menu_type'], ['F', 'P', 'B'])){
+        throw new Exception('菜单类型错误', ErrorCode::INVALID_PARAMS);
+      }
+
+      if($body['menu_type'] !== $menuInfo['menu_type']){
+        throw new Exception('禁止修改菜单类型', ErrorCode::INVALID_PARAMS);
+      }
+
+      if($body['menu_type'] === 'F'){
+        if(!($body['parent_id'] === 0 || $parentMenuInfo['menu_type'] === 'F')){
+          throw new Exception('页面夹的父级菜单只能是页面夹', ErrorCode::INVALID_PARAMS);
+        }
+      }
+
+      if($body['menu_type'] === 'F' || $body['menu_type'] === 'P'){
+        if(!isset($body['visible'])){
+          throw new Exception('是否隐藏不能为空', ErrorCode::INVALID_PARAMS);
+        }
+        if($this -> _checkSuperNodeIdEqualMenuId($body['parent_id'], $menuInfo['menu_id'])){
+          throw new Exception('父级菜单不能选择自身的子菜单', ErrorCode::INVALID_PARAMS);
+        }
+      }
+
+      if($body['menu_type'] === 'P'){
+        if(!isset($body['is_link'])){
+          throw new Exception('是否为外部链接不能为空', ErrorCode::INVALID_PARAMS);
+        }
+
+        if(!isset($body['cache'])){
+          throw new Exception('是否缓存不能为空', ErrorCode::INVALID_PARAMS);
+        }
+
+        if(!isset($body['layout'])){
+          throw new Exception('是否显示布局不能为空', ErrorCode::INVALID_PARAMS);
+        }
+      }
+
+      if($menuInfo['permission'] === 'admin:sysmenu'){
+        if($body['is_link'] != $menuInfo['is_link']){
+          throw new Exception('菜单管理页面不允许修改是否为外链', ErrorCode::UPDATE_FAILED);
+        }
+        if($body['permission'] != $menuInfo['permission']){
+          throw new Exception('菜单管理页面不允许修改权限标识', ErrorCode::UPDATE_FAILED);
+        }
       }
 
       $this -> _checkForRequired($body);
       $data = $this -> _convertBodyContent($body);
-
-      $menuInfo = $this -> _sysMenuLib -> getMenuInfo($data['menu_id']);
-
-      if($data['parent_id'] == $menuInfo['menu_id']){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
-      }
 
       $this -> _sysMenuLib -> updateMenu($data);
       $this -> _handleSetMenuApi($data['menu_id'], $data['apis']);
@@ -264,6 +328,17 @@
         'code' => 0,
         'message' => 'success',
       ];
+    }
+
+    private function _checkSuperNodeIdEqualMenuId($parentId, $menuId){
+      $parent = $this -> _sysMenuLib -> getMenuInfo($parentId);
+      if(empty($parent) || $parent['parent_id'] == 0){
+        return false;
+      }
+      if($parent['parent_id'] === $menuId){
+        return true;
+      }
+      return $this -> _checkSuperNodeIdEqualMenuId($parent['parent_id'], $menuId);
     }
 
     private function _handleDeleteSysMenu(){
