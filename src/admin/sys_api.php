@@ -73,7 +73,7 @@
       $body = json_decode($raw, true);
 
       if(empty($body['id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('接口ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _checkForRequired($body);
@@ -90,7 +90,7 @@
       $body = json_decode($raw, true);
 
       if(empty($body['id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('接口ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _sysApiLib -> deleteApi($body['id']);
