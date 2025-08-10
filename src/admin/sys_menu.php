@@ -346,11 +346,11 @@
       $body = json_decode($raw, true);
 
       if(empty($body['menu_id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('菜单ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $permission = $this -> _sysMenuLib -> getMenuInfo($body['menu_id'])['permission'];
-      $this -> _handlePrevent($body['menu_id'], $permission);
+      $this -> _handlePreventDelete($body['menu_id'], $permission);
       $this -> _handleDeleteMenuByPid($body['menu_id']);
       return [
         'code' => 0,
@@ -358,20 +358,18 @@
       ];
     }
 
-    private function _handlePrevent($id, $permission){
+    private function _handlePreventDelete($id, $permission){
       if($permission === 'admin:sysmenu'){
-        throw new Exception('删除失败（包含不允许被删除的菜单）', ErrorCode::MENU_CANT_DELETE);
+        throw new Exception('此菜单不允许被删除或者其子菜单中包含不允许被删除的菜单', ErrorCode::MENU_CANT_DELETE);
       }
 
       $res = $this -> _sysMenuLib -> getSysMenuListByPid($id);
 
       if(!empty($res)){
         foreach($res as &$value){
-          $this -> _handlePrevent($value['menu_id'], $value['permission']);
+          $this -> _handlePreventDelete($value['menu_id'], $value['permission']);
         }
       }
-
-      return;
     }
 
     private function _handleDeleteMenuByPid($id){
