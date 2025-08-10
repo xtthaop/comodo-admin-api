@@ -36,15 +36,19 @@
     }
 
     private function _checkForRequired($body){
-      if(
-        !(isset($body['title']) && strlen($body['title'])) ||
-        !(isset($body['path']) && strlen($body['path'])) ||
-        !(isset($body['type']) && strlen($body['type']))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(!(isset($body['title']) && strlen($body['title']))){
+        throw new Exception('接口名称不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      $apiId = empty($body['id']) ? '' : $body['id'];
+      if(!(isset($body['path']) && strlen($body['path']))){
+        throw new Exception('接口路径不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!(isset($body['type']) && strlen($body['type']))){
+        throw new Exception('请求类型不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      $apiId = empty($body['id']) ? 0 : $body['id'];
       $existedTitleCount = $this -> _sysApiLib -> getExistedCount('title', $body['title'], $apiId);
       if($existedTitleCount > 0){
         throw new Exception('接口名称已被使用', ErrorCode::API_TITLE_EXISTED);
