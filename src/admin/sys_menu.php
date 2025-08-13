@@ -360,7 +360,7 @@
 
     private function _handlePreventDelete($id, $permission){
       if($permission === 'admin:sysmenu'){
-        throw new Exception('此菜单不允许被删除或者其子菜单中包含不允许被删除的菜单', ErrorCode::MENU_CANT_DELETE);
+        throw new Exception('此菜单不允许被删除或者其子菜单中包含不允许被删除的菜单', ErrorCode::DELETE_FAILED);
       }
 
       $res = $this -> _sysMenuLib -> getSysMenuListByPid($id);

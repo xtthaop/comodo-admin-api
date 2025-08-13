@@ -28,6 +28,10 @@
 
       $this -> _checkForRequired($body);
 
+      if(!($body['status'] === 0 || $body['status'] === 1)){
+        $body['status'] = 1;
+      }
+
       $this -> _dictTypeLib -> addDictType($body);
       return [
         'code' => 0,
@@ -40,7 +44,11 @@
       $body = json_decode($raw, true);
 
       if(empty($body['dict_id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('字典ID不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!isset($body['status'])){
+        throw new Exception('字典状态不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _checkForRequired($body);
@@ -53,24 +61,24 @@
     }
 
     private function _checkForRequired($body){
-      if(
-        !(isset($body['dict_name']) && strlen($body['dict_name'])) ||
-        !(isset($body['dict_type']) && strlen($body['dict_type'])) ||
-        !(isset($body['status']) && strlen($body['status']))
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(!(isset($body['dict_name']) && strlen($body['dict_name']))){
+        throw new Exception('字典名称不能为空', ErrorCode::INVALID_PARAMS);
+      }
+        
+      if(!(isset($body['dict_type']) && strlen($body['dict_type']))){
+        throw new Exception('字典类型不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      $dictId = $body['dict_id'] ? $body['dict_id'] : '';
+      $dictId = $body['dict_id'] ? $body['dict_id'] : 0;
 
       $existedNameCount = $this -> _dictTypeLib -> getExistedCount('dict_name', $body['dict_name'], $dictId);
       if($existedNameCount > 0){
-        throw new Exception('字典名称已存在', ErrorCode::DICT_NAME_EXISTED);
+        throw new Exception('字典名称已存在', ErrorCode::INVALID_PARAMS);
       }
 
       $existedTypeCount = $this -> _dictTypeLib -> getExistedCount('dict_type', $body['dict_type'], $dictId);
       if($existedTypeCount > 0){
-        throw new Exception('字典类型已存在', ErrorCode::DICT_TYPE_EXISTED);
+        throw new Exception('字典类型已存在', ErrorCode::INVALID_PARAMS);
       }
     }
 
@@ -92,7 +100,7 @@
       $body = json_decode($raw, true);
 
       if(empty($body['dict_id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('字典ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _dictTypeLib -> deleteDictType($body['dict_id']);

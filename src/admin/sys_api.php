@@ -51,7 +51,7 @@
       $apiId = empty($body['id']) ? 0 : $body['id'];
       $existedTitleCount = $this -> _sysApiLib -> getExistedCount('title', $body['title'], $apiId);
       if($existedTitleCount > 0){
-        throw new Exception('接口名称已被使用', ErrorCode::API_TITLE_EXISTED);
+        throw new Exception('接口名称已被使用', ErrorCode::INVALID_PARAMS);
       }
     }
 
