@@ -9,6 +9,4 @@
     const USER_VERIFY_FAILED = 4021; // 用户名和密码不匹配
     const OLD_PASSWORD_VERIFY_FAILED = 4022; // 旧密码验证失败
     const USER_HAS_UNENABLED = 4024; // 账户被禁用
-    const DICT_DATA_LABEL_EXISTED = 4025; // 字典数据标签已存在
-    const DICT_DATA_VALUE_EXISTED = 4026; // 字典数据值已存在
   }

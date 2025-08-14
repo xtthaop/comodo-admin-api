@@ -37,6 +37,10 @@
 
       $this -> _checkForRequired($body);
 
+      if(!($body['status'] === 0 || $body['status'] === 1)){
+        $body['status'] = 1;
+      }
+
       $this -> _dictDataLib -> addDictData($body);
       return [
         'code' => 0,
@@ -45,26 +49,32 @@
     }
 
     private function _checkForRequired($body){
-      if(
-        !(isset($body['dict_data_label']) && strlen($body['dict_data_label'])) || 
-        !(isset($body['dict_data_value']) && strlen($body['dict_data_value'])) ||
-        !(isset($body['dict_data_sort']) && strlen($body['dict_data_sort'])) ||
-        !(isset($body['status']) && strlen($body['status'])) ||
-        empty($body['dict_id'])
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(empty($body['dict_id'])){
+        throw new Exception('字典ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      $dictDataId = $body['dict_data_id'] ? $body['dict_data_id'] : '';
+      if(!(isset($body['dict_data_label']) && strlen($body['dict_data_label']))){
+        throw new Exception('标签不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!(isset($body['dict_data_value']) && strlen($body['dict_data_value']))){
+        throw new Exception('键值不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!isset($body['dict_data_sort'])){
+        throw new Exception('显示排序不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      $dictDataId = $body['dict_data_id'] ? $body['dict_data_id'] : 0;
 
       $existedNameCount = $this -> _dictDataLib -> getExistedCount('dict_data_label', $body['dict_data_label'], $dictDataId, $body['dict_id']);
       if($existedNameCount > 0){
-        throw new Exception('标签名称已存在', ErrorCode::DICT_DATA_LABEL_EXISTED);
+        throw new Exception('标签已存在', ErrorCode::INVALID_PARAMS);
       }
 
       $existedTypeCount = $this -> _dictDataLib -> getExistedCount('dict_data_value', $body['dict_data_value'], $dictDataId, $body['dict_id']);
       if($existedTypeCount > 0){
-        throw new Exception('键值已存在', ErrorCode::DICT_DATA_VALUE_EXISTED);
+        throw new Exception('键值已存在', ErrorCode::INVALID_PARAMS);
       }
     }
 
@@ -72,7 +82,7 @@
       $params = $_GET;
 
       if(empty($params['dict_id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('字典类型ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $res = $this -> _dictDataLib -> getDictDataList($params);
@@ -91,7 +101,11 @@
       $body = json_decode($raw, true);
 
       if(empty($body['dict_data_id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('字典数据ID不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!isset($body['status'])){
+        throw new Exception('字典数据状态不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _checkForRequired($body);
@@ -108,7 +122,7 @@
       $body = json_decode($raw, true);
 
       if(empty($body['dict_data_id'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('字典数据ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $this -> _dictDataLib -> deleteDictData($body['dict_data_id']);
@@ -122,7 +136,7 @@
       $params = $_GET;
 
       if(!(isset($params['dict_type']) && strlen($params['dict_type']))){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+        throw new Exception('字典类型不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $res = $this -> _dictDataLib -> getDictDataByType($params['dict_type']);
