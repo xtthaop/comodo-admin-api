@@ -106,16 +106,10 @@
         throw new Exception('用户名不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      if(empty($body['phone'])){
-        throw new Exception('手机号不能为空', ErrorCode::INVALID_PARAMS);
-      }
-
-      if(!preg_match('/^1[3-9]\d{9}$/', $body['phone'])){
-        throw new Exception('手机号格式不正确', ErrorCode::INVALID_PARAMS);
-      }
-
-      if(!(isset($body['nickname']) && strlen($body['nickname']))){
-        throw new Exception('昵称不能为空', ErrorCode::INVALID_PARAMS);
+      if(!empty($body['phone'])){
+        if(!preg_match('/^1[3-9]\d{9}$/', $body['phone'])){
+          throw new Exception('手机号格式不正确', ErrorCode::INVALID_PARAMS);
+        }
       }
 
       if(!is_array($body['role_ids'])){
@@ -127,7 +121,7 @@
       }
 
       if(!empty($body['email'])){
-        if(!preg_match('/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/', $body['email'])){
+        if(!preg_match('/^(([^<>()\[\]\\\\.,;:\s@"]+(\.[^<>()\[\]\\\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9\x{00A0}-\x{D7FF}\x{F900}-\x{FDCF}\x{FDF0}-\x{FFEF}]+\.)+[a-zA-Z\x{00A0}-\x{D7FF}\x{F900}-\x{FDCF}\x{FDF0}-\x{FFEF}]{2,}))$/uD', $body['email'])){
           throw new Exception('邮箱格式不正确', ErrorCode::INVALID_PARAMS);
         }
       }
@@ -139,9 +133,11 @@
         throw new Exception('用户名已被使用', ErrorCode::INVALID_PARAMS);
       }
 
-      $existedUsernameCount = $this -> _sysUserLib -> getExistedCount('nickname', $body['nickname'], $userId);
-      if($existedUsernameCount > 0){
-        throw new Exception('昵称已被使用', ErrorCode::INVALID_PARAMS);
+      if(!empty($body['nickname'])){
+        $existedUsernameCount = $this -> _sysUserLib -> getExistedCount('nickname', $body['nickname'], $userId);
+        if($existedUsernameCount > 0){
+          throw new Exception('昵称已被使用', ErrorCode::INVALID_PARAMS);
+        }
       }
     }
 

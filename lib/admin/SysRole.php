@@ -47,6 +47,14 @@
       ];
     }
 
+    public function getSysAllRoleList(){
+      $dataSql = 'SELECT * from `sys_role` ORDER BY `role_sort`, `created_at` DESC';
+      $stml = $this -> _db -> prepare($dataSql);
+      $stml -> execute();
+      $data = $stml -> fetchAll(PDO::FETCH_ASSOC);
+      return $data;
+    }
+
     public function getRoleMenuIds($roleId){
       $sql = 'SELECT `menu_id` FROM `sys_menu` WHERE `menu_id` IN (SELECT `menu_id` FROM `sys_role_menu_rule` 
               WHERE `role_id`=:role_id)';

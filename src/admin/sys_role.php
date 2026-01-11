@@ -14,7 +14,14 @@
         case 'POST':
           return $this -> _handleAddSysRole();
         case 'GET':
-          return $this -> _handleGetSysRole();
+          switch($params[2]){
+            case 'page':
+              return $this -> _handleGetSysRole();
+            case 'list':
+              return $this -> _handleGetSysAllRole();
+            default:
+              throw new Exception('请求的资源不存在', 404);
+          }
         case 'PUT':
           return $this -> _handleUpdateSysRole();
         case 'DELETE':
@@ -41,6 +48,17 @@
         'data' => [
           'total' => $res['total'],
           'sys_role_list' => $res['data'],
+        ],
+      ];
+    }
+
+    private function _handleGetSysAllRole(){
+      $res = $this -> _sysRoleLib -> getSysAllRoleList();
+      return [
+        'code' => 0,
+        'message' => 'success',
+        'data' => [
+          'sys_role_list' => $res,
         ],
       ];
     }
