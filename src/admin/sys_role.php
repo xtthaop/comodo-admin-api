@@ -73,6 +73,10 @@
         $body['status'] = 1;
       }
 
+      if(!isset($body['role_sort'])){
+        $body['role_sort'] = 0;
+      }
+
       $roleId = $this -> _sysRoleLib -> addRole($body);
       $this -> _handleSetRoleMenu($roleId, $body['menu_ids']);
       return [
@@ -98,11 +102,7 @@
       }
 
       if(!(isset($body['role_key']) && strlen($body['role_key']))){
-        throw new Exception('角色权限标识不能为空', ErrorCode::INVALID_PARAMS);
-      }
-
-      if(!isset($body['role_sort'])){
-        throw new Exception('角色排序不能为空', ErrorCode::INVALID_PARAMS);
+        throw new Exception('角色标识不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       if (!isset($body['check_strictly'])) {
