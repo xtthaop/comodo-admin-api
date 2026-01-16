@@ -63,6 +63,14 @@
       $stml -> execute();
     }
 
+    public function getSysAllApiList(){
+      $dataSql = 'SELECT * from `sys_api` ORDER BY `created_at` DESC';
+      $stml = $this -> _db -> prepare($dataSql);
+      $stml -> execute();
+      $data = $stml -> fetchAll(PDO::FETCH_ASSOC);
+      return $data;
+    }
+
     public function updateApi($body){
       global $gUserId;
       $currentTime = date('Y-m-d H:i:s');

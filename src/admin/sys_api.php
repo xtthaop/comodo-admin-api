@@ -8,11 +8,20 @@
 
     public function handleSysApi(){
       $requestMethod = $_SERVER['REQUEST_METHOD'];
+      $path = $_SERVER['PATH_INFO'];
+      $params = explode('/', $path);
       switch($requestMethod){
         case 'POST':
           return $this -> _handleAddSysApi();
         case 'GET':
-          return $this -> _handleGetSysApi();
+          switch($params[2]){
+            case 'page':
+              return $this -> _handleGetSysApi();
+            case 'list':
+              return $this -> _handleGetSysAllApi();
+            default:
+              throw new Exception('请求的资源不存在', 404);
+          }
         case 'PUT':
           return $this -> _handleUpdateSysApi();
         case 'DELETE':
@@ -64,6 +73,17 @@
         'data' => [
           'sys_api_list' => $res['data'],
           'total' => $res['total'],
+        ],
+      ];
+    }
+
+    private function _handleGetSysAllApi(){
+      $res = $this -> _sysApiLib -> getSysAllApiList();
+      return [
+        'code' => 0,
+        'message' => 'success',
+        'data' => [
+          'sys_api_list' => $res,
         ],
       ];
     }
