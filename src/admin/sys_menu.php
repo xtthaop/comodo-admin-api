@@ -304,22 +304,28 @@
           throw new Exception('是否为外部链接不能为空', ErrorCode::INVALID_PARAMS);
         }
 
-        if(!isset($body['cache'])){
-          throw new Exception('是否缓存不能为空', ErrorCode::INVALID_PARAMS);
+        if($body['is_link'] != $menuInfo['is_link']){
+          throw new Exception('页面是否为外链不支持修改', ErrorCode::UPDATE_FAILED);
         }
 
-        if(!isset($body['layout'])){
-          throw new Exception('是否显示布局不能为空', ErrorCode::INVALID_PARAMS);
+        if($body['is_link'] === 0){
+          if(!isset($body['cache'])){
+            throw new Exception('是否缓存不能为空', ErrorCode::INVALID_PARAMS);
+          }
+          if(!isset($body['layout'])){
+            throw new Exception('是否显示布局不能为空', ErrorCode::INVALID_PARAMS);
+          }
         }
       }
 
       if($menuInfo['permission'] === 'admin:sysmenu'){
-        if($body['is_link'] != $menuInfo['is_link']){
-          throw new Exception('菜单管理页面不允许修改是否为外链', ErrorCode::UPDATE_FAILED);
-        }
         if($body['permission'] != $menuInfo['permission']){
           throw new Exception('菜单管理页面不允许修改权限标识', ErrorCode::UPDATE_FAILED);
         }
+      }
+
+      if(!isset($body['sort'])){
+        $body['sort'] = 0;
       }
 
       $this -> _checkForRequired($body);
