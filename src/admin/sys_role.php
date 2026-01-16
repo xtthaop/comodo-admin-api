@@ -134,12 +134,12 @@
         throw new Exception('角色ID不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      if (!isset($body['role_sort'])) {
-        throw new Exception('角色排序不能为空', ErrorCode::INVALID_PARAMS);
-      }
-
       if (!isset($body['status'])) {
         throw new Exception('角色状态不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!isset($body['role_sort'])){
+        $body['role_sort'] = 0;
       }
 
       $this -> _checkForRequired($body);

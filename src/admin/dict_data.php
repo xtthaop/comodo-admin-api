@@ -41,6 +41,10 @@
         $body['status'] = 1;
       }
 
+      if(!isset($body['dict_data_sort'])){
+        $body['dict_data_sort'] = 0;
+      }
+
       $this -> _dictDataLib -> addDictData($body);
       return [
         'code' => 0,
@@ -59,10 +63,6 @@
 
       if(!(isset($body['dict_data_value']) && strlen($body['dict_data_value']))){
         throw new Exception('键值不能为空', ErrorCode::INVALID_PARAMS);
-      }
-
-      if(!isset($body['dict_data_sort'])){
-        throw new Exception('显示排序不能为空', ErrorCode::INVALID_PARAMS);
       }
 
       $dictDataId = $body['dict_data_id'] ? $body['dict_data_id'] : 0;
@@ -106,6 +106,10 @@
 
       if(!isset($body['status'])){
         throw new Exception('字典数据状态不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(!isset($body['dict_data_sort'])){
+        $body['dict_data_sort'] = 0;
       }
 
       $this -> _checkForRequired($body);
