@@ -96,6 +96,10 @@
         $body['layout'] = 1;
       }
 
+      if(!isset($body['sort'])){
+        $body['sort'] = 0;
+      }
+
       $this -> _checkForRequired($body);
       $data = $this -> _convertBodyContent($body);
 
@@ -129,10 +133,6 @@
         throw new Exception('菜单名称不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      if(!isset($body['sort'])){
-        throw new Exception('排序不能为空', ErrorCode::INVALID_PARAMS);
-      }
-
       if(!(isset($body['menu_type']) && strlen($body['menu_type']))){
         throw new Exception('菜单类型不能为空', ErrorCode::INVALID_PARAMS);
       }
@@ -141,8 +141,11 @@
         throw new Exception('菜单类型错误', ErrorCode::INVALID_PARAMS);
       }
 
-      $parent = $this -> _sysMenuLib -> getMenuInfo($body['parent_id']);
-      $parentMenuType = $parent['menu_type'];
+      $parentMenuType = 'F';
+      if($body['parent_id'] !== 0){
+        $parent = $this -> _sysMenuLib -> getMenuInfo($body['parent_id']);
+        $parentMenuType = $parent['menu_type'];
+      }
       $menuType = $body['menu_type'];
 
       if($parentMenuType === 'B'){
