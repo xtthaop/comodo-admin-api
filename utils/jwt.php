@@ -54,6 +54,7 @@ class JwtAuth {
       return false;
     }
 
+    // 30 分钟
     $refreshTime = 30 * 60;
 
 
@@ -64,13 +65,14 @@ class JwtAuth {
     if(isset($payload['exp']) && $payload['exp'] > time() && ($payload['exp'] - $refreshTime) <= time()){
       $newPayload = self::generatePayload($payload);
       $newToken = self::getToken($newPayload);
-      setcookie('COMODOADMINTOKEN', $newToken, 0, '/');
+      setcookie('COMODO_ADMIN_TOKEN', $newToken, 0, '/');
     }
 
     return $payload;
   }
 
   public static function generatePayload($info){
+    // 7 天
     $lifeTime = 7 * 24 * 60 * 60;
 
     return [
@@ -96,10 +98,6 @@ class JwtAuth {
       $input .= str_repeat('=', $addlen);
     }
     return base64_decode(strtr($input, '-_', '+/'));
-  }
-
-  public function md5Password($string, $key = 'comodo-admin'){
-    return md5($string . $key);
   }
 
   public function hashPassword($password){

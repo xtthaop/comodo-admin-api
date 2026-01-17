@@ -73,21 +73,6 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      if(!$_SESSION['captcha_x']){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
-      }
-
-      $xMax = $_SESSION['captcha_x'] + 6;
-      $xMin = $_SESSION['captcha_x'] - 6;
-
-      if(empty($body['x'])){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
-      }
-
-      if($body['x'] > $xMax || $body['x'] < $xMin){
-        throw new Exception('拼图验证失败', ErrorCode::CAPTCHA_VERIFY_FAILED);
-      }
-  
       if(!(isset($body['username']) && strlen($body['username']))){
         throw new Exception("用户名不能为空", ErrorCode::USERNAME_CANNOT_EMPTY);
       }
@@ -96,10 +81,24 @@
         throw new Exception("密码不能为空", ErrorCode::PASSWOED_CANNOT_EMPTY);
       }
 
-      $password = $this -> _jwt -> md5Password($body['password']);
-      $res = $this -> _userLib -> login($body['username'], $password);
-  
-      if(!empty($res)){
+      $xMax = $_SESSION['captcha_x'] + 6;
+      $xMin = $_SESSION['captcha_x'] - 6;
+
+      if(!isset($body['x'])){
+        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      }
+
+      if($body['x'] > $xMax || $body['x'] < $xMin){
+        throw new Exception('拼图验证失败', ErrorCode::CAPTCHA_VERIFY_FAILED);
+      }
+
+      $res = $this -> _userLib -> login($body['username']);
+
+      if(empty($res)){
+        $this -> _handleLoginFailed();
+      }
+
+      if($this -> _jwt -> verifyPassword($body['password'], $res['password'])){
         $payload = $this -> _jwt -> generatePayload($res);
         $token = $this -> _jwt -> getToken($payload);
         $this -> _handleRecordLoginLog($body['username']);
@@ -112,8 +111,14 @@
           ],
         ];
       }else{
-        throw new Exception("用户名与密码不匹配", ErrorCode::USER_VERIFY_FAILED);
+        $this -> _handleLoginFailed();
       }
+    }
+
+    private function _handleLoginFailed() {
+      // 重置验证码否则拿到这个验证码可不受验证限制不断重试密码
+      $_SESSION['captcha_x'] = mt_rand(0, $_SESSION['captcha_x'] - 10);
+      throw new Exception("用户名与密码不匹配", ErrorCode::USER_VERIFY_FAILED);
     }
 
     private function _handleRecordLoginLog($username){

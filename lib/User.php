@@ -6,11 +6,10 @@
       $this -> _db = $db;
     }
 
-    public function login($username, $password){
-      $sql = 'SELECT `user_id` as `uid`, `username` as `unm` FROM `sys_user` WHERE `username`=:username AND `password`=:password';
+    public function login($username){
+      $sql = 'SELECT `user_id` as `uid`, `username` as `unm`, `password` FROM `sys_user` WHERE `username`=:username';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':username', $username);
-      $stml -> bindParam(':password', $password);
       $stml -> execute();
       $result = $stml -> fetch(PDO::FETCH_ASSOC);
       return $result;

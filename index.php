@@ -120,20 +120,24 @@
           return;
         }
 
-        $tokenInBlack = $this -> _jwt -> checkTokenInBlack($_SERVER['HTTP_X_TOKEN']);
-        if($tokenInBlack){
-          throw new Exception("权限验证失败，请重新登录", 401);
-        }
-
         $res = $this -> _jwt -> verifyToken($_SERVER['HTTP_X_TOKEN']);
+        $tokenInBlack = $this -> _jwt -> checkTokenInBlack($_SERVER['HTTP_X_TOKEN']);
 
         if(!empty($res)){
           $gUserId = $res['uid'];
           $gUserName = $res['unm'];
+
           if(empty($this -> _permission -> handleCheckUserEnabled())){
-            $this -> _jwt -> addTokenToBlack($_SERVER['HTTP_X_TOKEN']);
+            if(!$tokenInBlack){
+              $this -> _jwt -> addTokenToBlack($_SERVER['HTTP_X_TOKEN']);
+            }
             throw new Exception("您的账户已被禁用", ErrorCode::USER_HAS_UNENABLED);
           }
+          
+          if($tokenInBlack){
+            throw new Exception("权限验证失败，请重新登录", 401);
+          }
+
           if(!($this -> _permission -> checkApiPermission())){
             throw new Exception("访问被拒绝", 403);
           }
