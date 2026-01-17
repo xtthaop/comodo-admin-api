@@ -33,7 +33,7 @@
       $sql = 'SELECT * FROM `sys_menu` WHERE `parent_id`=:parent_id AND `menu_id` IN 
              (SELECT `menu_id` FROM `sys_role_menu_rule` WHERE `role_id` IN 
              (SELECT ur.role_id FROM `sys_user_role_rule` as `ur` INNER JOIN `sys_role` as r ON ur.role_id=r.role_id
-             WHERE `user_id`=:user_id AND `status`=1))';
+             WHERE `user_id`=:user_id AND `status`=1)) ORDER BY `sort`, `created_at` DESC';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':parent_id', $pid);
       $stml -> bindParam(':user_id', $userId);

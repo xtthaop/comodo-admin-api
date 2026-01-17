@@ -16,7 +16,7 @@
     }
 
     public function getUserInfo($userId){
-      $sql = 'SELECT `nickname` FROM `sys_user` WHERE `user_id`=:user_id';
+      $sql = 'SELECT `nickname`, `username` FROM `sys_user` WHERE `user_id`=:user_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':user_id', $userId);
       $stml -> execute();

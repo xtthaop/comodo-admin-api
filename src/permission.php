@@ -67,7 +67,7 @@
       if($this -> _sysUserLib -> checkUserIsAdminRole($gUserId)){
         $dynamicRoutes = $this -> _generateAllRoutes();
       }else{
-        $dynamicRoutes = $this -> _generateAPermissionRoutes();
+        $dynamicRoutes = $this -> _generatePermissionRoutes();
       }
 
       $allPath = $this -> _sysMenuLib -> getAllSysMenuPath();
@@ -99,14 +99,14 @@
       return $tree;
     }
 
-    private function _generateAPermissionRoutes($pid = 0){
+    private function _generatePermissionRoutes($pid = 0){
       global $gUserId;
       $res = $this -> _permissionLib -> getPermissionMenuByPid($pid, $gUserId);
       $tree = array();
       if(!empty($res)){
         foreach($res as &$value){
           if($value['menu_type'] !== 'B'){
-            $value['children'] = $this -> _generateAPermissionRoutes($value['menu_id']);
+            $value['children'] = $this -> _generatePermissionRoutes($value['menu_id']);
             $tree[] = $value;
           }
         }
