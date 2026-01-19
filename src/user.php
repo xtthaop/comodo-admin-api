@@ -169,20 +169,32 @@
       $raw = file_get_contents('php://input');
       $body = json_decode($raw, true);
 
-      if(
-        !(isset($body['old_password']) && strlen($body['old_password'])) ||
-        !(isset($body['new_password']) && strlen($body['new_password'])) ||
-        $body['confirm_password'] !== $body['new_password']
-      ){
-        throw new Exception('参数错误', ErrorCode::INVALID_PARAMS);
+      if(!(isset($body['old_password']) && strlen($body['old_password']))){
+        throw new Exception('旧密码不能为空', ErrorCode::INVALID_PARAMS);
       }
 
-      $oldPassword = $this -> _jwt -> md5Password($body['old_password']);
-      $res = $this -> _userLib -> verifyOldPassword($gUserId, $oldPassword);
+      if(strlen($body['old_password']) !== 32){
+        throw new Exception('旧密码不完整', ErrorCode::INVALID_PARAMS);
+      }
 
-      if(!empty($res)){
-        $body['new_password'] = $this -> _jwt -> md5Password($body['new_password']);
+      if(!(isset($body['new_password']) && strlen($body['new_password']))){
+        throw new Exception('新密码不能为空', ErrorCode::INVALID_PARAMS);
+      }
+
+      if(strlen($body['new_password']) !== 32){
+        throw new Exception('新密码不完整', ErrorCode::INVALID_PARAMS);
+      }
+
+      if($body['confirm_password'] !== $body['new_password']){
+        throw new Exception('两次输入的密码不一致', ErrorCode::INVALID_PARAMS);
+      }
+
+      $res = $this -> _userLib -> getOldPassword($gUserId);
+
+      if($this -> _jwt -> verifyPassword($body['old_password'], $res['password'])){
+        $body['new_password'] = $this -> _jwt -> hashPassword($body['new_password']);
         $this -> _userLib -> changePassword($gUserId, $body);
+        $this -> _jwt -> addTokenToBlack($_SERVER['HTTP_X_TOKEN']);
       }else{
         throw new Exception('旧密码验证失败', ErrorCode::OLD_PASSWORD_VERIFY_FAILED);
       }

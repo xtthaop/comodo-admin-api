@@ -46,11 +46,10 @@
       return $result;
     }
 
-    public function verifyOldPassword($userId, $oldPassword){
-      $sql = 'SELECT `user_id`, `username` FROM `sys_user` WHERE `user_id`=:user_id AND `password`=:password';
+    public function getOldPassword($userId){
+      $sql = 'SELECT `password` FROM `sys_user` WHERE `user_id`=:user_id';
       $stml = $this -> _db -> prepare($sql);
       $stml -> bindParam(':user_id', $userId);
-      $stml -> bindParam(':password', $oldPassword);
       $stml -> execute();
       $result = $stml -> fetch(PDO::FETCH_ASSOC);
       return $result;
