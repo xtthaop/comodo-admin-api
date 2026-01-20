@@ -2,64 +2,91 @@
 
 Class Client {
   public function getIpAddress(){
-    if(!empty($_SERVER['HTTP_CLIENT_IP'])){
-      $ipaddr = $_SERVER['HTTP_CLIENT_IP'];
-    }elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
-      $ipaddr = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    }else{
-      $ipaddr = $_SERVER['REMOTE_ADDR'];
+    // 1. 优先使用 REMOTE_ADDR (最安全)
+    $ip = $_SERVER['REMOTE_ADDR'];
+
+    // 如果确认服务器在代理/负载均衡后面才查看 X-Forwarded-For
+    if(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
+      // X-Forwarded-For 可能是 "client, proxy1, proxy2" 格式
+      $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+      // 取第一个 IP (通常是客户端原始 IP)
+      $temp_ip = trim($ips[0]);
+      
+      // 验证 IP 格式是否合法
+      if(filter_var($temp_ip, FILTER_VALIDATE_IP)){
+        $ip = $temp_ip;
+      }
     }
-    return $ipaddr;
+
+    return $ip;
   }
 
   public function getBrowser(){
-    $sys = $_SERVER['HTTP_USER_AGENT'];
-    if(stripos($sys, "Firefox/") > 0){
-      preg_match("/Firefox\/([^;)]+)+/i", $sys, $b);
-      $exp[0] = "Firefox";
-      $exp[1] = $b[1];
-    }elseif(stripos($sys, "MSIE") > 0){  
-      preg_match("/MSIE\s+([^;)]+)+/i", $sys, $ie);  
-      $exp[0] = "IE";
-      $exp[1] = $ie[1];
-    }elseif(stripos($sys, "OPR") > 0){
-      preg_match("/OPR\/([\d\.]+)/", $sys, $opera);
-      $exp[0] = "Opera";
-      $exp[1] = $opera[1]; 
-    }elseif(stripos($sys, "Edge") > 0){
-      preg_match("/Edge\/([\d\.]+)/", $sys, $Edge);
-      $exp[0] = "Edge";
-      $exp[1] = $Edge[1];
-    }elseif (stripos($sys, "Chrome") > 0){  
-      preg_match("/Chrome\/([\d\.]+)/", $sys, $google);
-      $exp[0] = "Chrome";
-      $exp[1] = $google[1];
-    }elseif(stripos($sys,'rv:')>0 && stripos($sys,'Gecko')>0){
-      preg_match("/rv:([\d\.]+)/", $sys, $IE);
-      $exp[0] = "IE";
-      $exp[1] = $IE[1];
-    }else{
-      $exp[0] = "未知浏览器";
-      $exp[1] = "";
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $browser = "未知浏览器";
+    $version = "";
+
+    if(stripos($ua, 'MSIE') !== false){ // IE 10 or below
+      $browser = 'IE';
+      preg_match('/MSIE\s+([^;)]+)/i', $ua, $regs);
+      $version = $regs[1] ?? '';
+    }elseif(stripos($ua, 'rv:') !== false && stripos($ua, 'Gecko') !== false){ // IE 11
+      $browser = 'IE';
+      preg_match('/rv:([\d\.]+)/i', $ua, $regs);
+      $version = $regs[1] ?? '';
+    }elseif(stripos($ua, 'Edg/') !== false){ // Chromium Edge
+      $browser = 'Edge';
+      preg_match('/Edg\/([\d\.]+)/i', $ua, $regs);
+      $version = $regs[1] ?? '';
+    }elseif(stripos($ua, 'OPR/') !== false || stripos($ua, 'Opera/') !== false){
+      $browser = 'Opera';
+      preg_match('/(OPR|Opera)\/([\d\.]+)/i', $ua, $regs);
+      $version = $regs[2] ?? '';
+    }elseif(stripos($ua, 'Firefox/') !== false){
+      $browser = 'Firefox';
+      preg_match('/Firefox\/([\d\.]+)/i', $ua, $regs);
+      $version = $regs[1] ?? '';
+    }elseif(stripos($ua, 'Chrome/') !== false){
+      $browser = 'Chrome';
+      preg_match('/Chrome\/([\d\.]+)/i', $ua, $regs);
+      $version = $regs[1] ?? '';
+    }elseif(stripos($ua, 'Safari/') !== false){
+      $browser = 'Safari';
+      preg_match('/Version\/([\d\.]+)/i', $ua, $regs);
+      $version = $regs[1] ?? '';
     }
-    return $exp[0].'('.$exp[1].')';
+
+    return $version ? "$browser($version)" : $browser;
   }
 
   public function getOs(){
-    $OS = $_SERVER['HTTP_USER_AGENT'];
-    if(preg_match('/win/i',$OS)){
-      $OS = 'Windows';
-    }elseif(preg_match('/mac/i',$OS)) {
-      $OS = 'MAC';
-    }elseif(preg_match('/linux/i',$OS)) {
-      $OS = 'Linux';
-    }elseif(preg_match('/unix/i',$OS)) {
-      $OS = 'Unix';
-    }elseif(preg_match('/bsd/i',$OS)) {
-      $OS = 'BSD';
-    }else{
-      $OS = 'Other';
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    
+    // 1. 先判断移动端系统 (因为它们往往包含桌面系统的关键字)
+    if(preg_match('/android/i', $ua)){
+      return 'Android';
+    } 
+    if(preg_match('/(iPhone|iPad|iPod)/i', $ua)){
+      return 'iOS';
     }
-    return $OS;
+
+    // 2. 再判断桌面端
+    if(preg_match('/window/i', $ua)){ // 匹配 Windows
+      return 'Windows';
+    } 
+    if(preg_match('/mac os x/i', $ua)){ // 明确匹配 Mac 桌面系统
+      return 'macOS';
+    } 
+    if(preg_match('/linux/i', $ua)){
+      return 'Linux';
+    } 
+    if(preg_match('/unix/i', $ua)){
+      return 'Unix';
+    } 
+    if(preg_match('/bsd/i', $ua)){
+      return 'BSD';
+    }
+
+    return 'Other';
   }
 }
