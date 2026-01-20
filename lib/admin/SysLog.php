@@ -82,6 +82,12 @@
       $dataSql = 'SELECT * from `sys_operation_log` WHERE 1=1';
       $arr = array();
 
+      if(isset($params['username']) && strlen($params['username'])){
+        $countSql .= ' AND `operator` LIKE :username';
+        $dataSql .= ' AND `operator` LIKE :username';
+        $arr[':username'] = '%' . $params['username'] . '%';
+      }
+
       if(!empty($params['date_range'])){
         $countSql .= ' AND `operation_time` BETWEEN :start_time AND :end_time';
         $dataSql .= ' AND `operation_time` BETWEEN :start_time AND :end_time';
