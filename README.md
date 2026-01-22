@@ -24,9 +24,12 @@ Comodo Admin 是一款极简的 RBAC（基于角色的访问控制） 后台管�
 
 初始账号信息与在线预览相同。
 
-### 提示词文档：[./PROMPT.md](https://github.com/xtthaop/comodo-admin-web/blob/main/PROMPT.md)
+### 文档：
 
-如果你需要用 AI 辅助开发。
+提示词文档：[comodo-admin-web/PROMPT.md](https://github.com/xtthaop/comodo-admin-web/blob/main/PROMPT.md)     
+接口文档：<https://s.apifox.cn/b140bb25-d2d9-469b-a53b-161fac393622>
+
+这两个文档可用于 AI 辅助开发。
 
 ### 特别感谢
 
